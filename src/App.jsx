@@ -1,14 +1,21 @@
 import React from "react";
-import Dashboard from "./Dashboard";
+import { HashRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import DashboardEditor from "./dashboard/DashboardEditor";
 import DashboardView from "./dashboard/DashboardView";
+import TitleBar from "./TitleBar"; 
+import './gridstack.css';
 
 function App() {
   return (
-    <div>
-      <h1>Dashboard</h1>
-      {/* <Dashboard /> */}
-      <DashboardView />
-    </div>
+    <Router>
+      <div>
+        <TitleBar />
+        <Routes>
+          <Route path="/" element={<DashboardView />} />
+          <Route path="/edit" element={<DashboardEditor />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

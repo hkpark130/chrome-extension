@@ -1,21 +1,12 @@
 import React from "react";
+import './item.css';
 
-const Widget = ({ onRemove, id }) => {
+const Widget = ({ isEditing }) => {
   return (
     <div
+      className='item-style'
       style={{
-        width: "100%",
-        height: "100%",
-        overflow: "auto", // 컨텐츠가 넘칠 경우 스크롤바 표시
-        boxSizing: "border-box",
-        padding: "8px",
-        border: "1px solid #ccc",
-        position: "relative",
-        textAlign: "center",
-
-        // alignContent: "center",
-        // alignItems: 'center',
-        // justifyContent: 'center',
+        pointerEvents: isEditing ? "none" : "auto",
       }}
     >
       {/* 위젯 컨텐츠 */}

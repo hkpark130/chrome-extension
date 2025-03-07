@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import RGL, { WidthProvider } from "react-grid-layout";
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import './gridstack.css';
+import { useNavigate } from "react-router-dom";
 import Widget from './components/Widget';
 import Bookmark from './components/Bookmark';
 
@@ -10,11 +10,12 @@ const ReactGridLayout = WidthProvider(RGL);
 const STORAGE_KEY = "dashboard_layout"; 
 
 const widgets = [
-  { component: 'Widget', label: 'Widget', w: 2, h: 3, content: <Widget /> },
-  { component: 'Bookmark', label: 'Bookmark', w: 1, h: 2, content: <Bookmark /> },
+  { component: 'Widget', label: 'Widget', w: 2, h: 3, content: <Widget isEditing={true}/> },
+  { component: 'Bookmark', label: 'Bookmark', w: 1, h: 2, content: <Bookmark isEditing={true}/> },
 ];
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [layout, setLayout] = useState([]);
   const [counter, setCounter] = useState(0);
@@ -31,13 +32,21 @@ const Dashboard = () => {
   }, []);
 
   const saveToLocalStorage = (updatedItems, updatedLayout) => {
+    const newLayout = JSON.parse(JSON.stringify(updatedLayout));
+    updatedItems.forEach(item => {
+        const existingLayoutItem = newLayout.find(layoutItem => layoutItem.i === item.i);
+        if (existingLayoutItem) {
+            existingLayoutItem.component = item.component;
+        } 
+    });
     const savedData = {
       items: updatedItems,
-      layout: updatedLayout,
+      layout: newLayout,
       counter: counter
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(savedData));
     alert("저장완료");
+    navigate("/");
   };
 
   const removeItem = (id) => {
@@ -129,7 +138,7 @@ const Dashboard = () => {
               right: "0",
             }}
             >
-            저장
+            <b>💾 저장</b>
           </button>
         </div>
         {widgets.map((widget) => (
@@ -213,7 +222,7 @@ const Dashboard = () => {
                 >
                   ✖
                 </div>
-                  {widgetData ? widgetData.content : "Unknown Widget"}
+                {widgetData ? widgetData.content : "Unknown Widget"}
               </div>
             );
           })}

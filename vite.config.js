@@ -12,4 +12,16 @@ export default defineConfig({
       },
     },
   },
+  build: { // Vite의 build 설정
+    rollupOptions: {
+      input: {
+        main: "index.html",
+        background: "src/background.js"
+      },
+      output: {
+        dir: 'dist',
+        entryFileNames: "assets/[name].js"
+      },
+    },
+  },
 })

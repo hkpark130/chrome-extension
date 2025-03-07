@@ -4,6 +4,8 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import Widget from '../components/Widget';
 import Bookmark from '../components/Bookmark';
+import Calendar from '../components/Calendar';
+import { useNavigate } from "react-router-dom";
 
 const ReactGridLayout = WidthProvider(RGL);
 const STORAGE_KEY = "dashboard_layout"; 
@@ -11,10 +13,12 @@ const STORAGE_KEY = "dashboard_layout";
 const widgets = [
   { component: 'Widget', content: <Widget /> },
   { component: 'Bookmark', content: <Bookmark /> },
+  { component: 'Calendar', content: <Calendar /> },
 ];
 
-const DashboardView = ({ onEdit }) => {
+const DashboardView = () => {
   const [layout, setLayout] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const savedLayout = localStorage.getItem(STORAGE_KEY);
@@ -25,13 +29,26 @@ const DashboardView = ({ onEdit }) => {
 
   return (
     <div style={{ height: '100vh', padding: '10px' }}>
-      <button onClick={onEdit} style={{ padding: '10px', background: 'orange', color: 'white', border: 'none', cursor: 'pointer' }}>
-        대시보드 편집
+      <button onClick={() => navigate("/edit")} 
+        style={{ 
+          position: 'absolute', 
+          top: 5, right: 5, 
+          padding: '8px', 
+          fontSize: '15px', 
+          background: 'orange', 
+          color: 'white', 
+          border: 'none', 
+          cursor: 'pointer',
+          borderRadius: "15px",
+        }}>
+        <b>⚙️ 편집</b>
       </button>
 
       <ReactGridLayout
         className="layout"
         layout={layout}
+        verticalCompact={false}
+        
         cols={21}
         rowHeight={38}
         width={800}
@@ -40,9 +57,8 @@ const DashboardView = ({ onEdit }) => {
       >
         {layout.map(item => {
           const widgetData = widgets.find(widget => widget.component === item.component);
-          console.log(item);
           return (
-            <div key={item.i} data-grid={item} style={{ border: '1px solid #ccc', background: '#eee', padding: '10px' }}>
+            <div key={item.i} data-grid={item} style={{ border: '1px solid #ccc', background: '#eee' }}>
               {widgetData ? widgetData.content : "Unknown Widget"}
             </div>
           );

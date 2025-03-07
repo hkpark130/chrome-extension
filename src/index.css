@@ -1,0 +1,38 @@
+/* 제목과 페이지네이션 스타일 */
+.title-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.title-space {
+    display: flex;
+    width: 30%;
+}
+
+/* 제목 스타일 */
+.title {
+    width: 40%;
+    display: flex;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    justify-content: center;
+}
+
+.logo {
+    height: 6em;
+    padding: 1.5em;
+    will-change: filter;
+    transition: filter 300ms;
+}
+
+.logo:hover {
+    filter: drop-shadow(0 0 1.5em #646cff);
+}
+
+.logo.react:hover {
+    filter: drop-shadow(0 0 1.5em #61dafb);
+}

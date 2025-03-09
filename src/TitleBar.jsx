@@ -8,7 +8,7 @@ import { LogOut } from "lucide-react";
 const TitleBar = () => {
   const navigate = useNavigate();
   return (
-    <header className="w-full flex justify-between items-center px-6 py-2 bg-white border-b shadow-sm">
+    <header className="w-full flex justify-between items-center px-6 py-1 bg-white border-b shadow-sm">
       {/* 사용자 정보 */}
       <div className="flex items-center gap-4">
         <img src={userIcon} className="w-10 h-10 rounded-full border border-gray-300 shadow-sm" alt="user" />
@@ -29,7 +29,6 @@ const TitleBar = () => {
           alt="DIREA Logo"
           onClick={() => navigate("/")}
         />
-        <span className="text-xs text-cyan-500 font-light tracking-wide mt-1">DIREA</span>
       </div>
 
       {/* 빈 공간 */}

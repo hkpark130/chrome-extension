@@ -31,7 +31,7 @@ const DashboardView = () => {
 
   return (
     <div className="h-screen bg-gray-100 flex flex-col">
-      <Button onClick={() => navigate("/edit")} className="absolute top-5 right-5 bg-orange-500 text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-orange-600">
+      <Button onClick={() => navigate("/edit")} className="absolute top-2 right-2 bg-orange-500 text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-orange-600">
         <Settings className="w-4 h-4" />
         편집
       </Button>
@@ -55,7 +55,7 @@ const DashboardView = () => {
               <div
                 key={item.i}
                 data-grid={item}
-                className="border border-gray-300 bg-white shadow-md rounded-lg p-4"
+                className="border border-gray-300 bg-white shadow-md rounded-lg"
               >
                 {widgetData ? widgetData.content : "Unknown Widget"}
               </div>

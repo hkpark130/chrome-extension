@@ -130,9 +130,9 @@ const DashboardEditor = () => {
         <ReactGridLayout
           draggableCancel=".cancelSelectorName"
           autoSize={false}
-          preventCollision={false} // 충돌 방지 (자동정렬)
+          preventCollision={true} // 충돌 방지 (자동정렬)
           verticalCompact={false}
-          className="layout"
+          className="layout h-screen w-full"
           layout={layout}
           cols={21}
           rowHeight={38}

@@ -7,7 +7,6 @@ import Bookmark from "@/components/Bookmark";
 import MeetingRoomCalendar from "@/components/MeetingRoomCalendar";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
 import { Settings } from "lucide-react";
 
 const ReactGridLayout = WidthProvider(RGL);
@@ -32,20 +31,10 @@ const DashboardView = () => {
 
   return (
     <div className="h-screen bg-gray-100 flex flex-col">
-      <button onClick={() => navigate("/edit")} 
-        style={{ 
-          position: 'absolute', 
-          top: 5, right: 5, 
-          padding: '8px', 
-          fontSize: '15px', 
-          background: 'orange', 
-          color: 'white', 
-          border: 'none', 
-          cursor: 'pointer',
-          borderRadius: "15px",
-        }}>
-        <b>⚙️ 편집</b>
-      </button>
+      <Button onClick={() => navigate("/edit")} className="absolute top-5 right-5 bg-orange-500 text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-orange-600">
+        <Settings className="w-4 h-4" />
+        편집
+      </Button>
       {/* 대시보드 컨텐츠 */}
       <main className="flex-1 p-6">
         <ReactGridLayout

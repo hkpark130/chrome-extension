@@ -37,17 +37,19 @@ const Bookmark = ({ isEditing }) => {
   return (
     <div
       className='item-style'
-      style={{
-        pointerEvents: isEditing ? "none" : "auto",
-      }}
     >
-      <p>Book</p>
-      <button onClick={() => {handleEditClick(1);}} className="cancelSelectorName">zz</button>
-      <Modal isOpen={showEditForm} onClose={() => setShowEditForm(false)}>
-        <h3>책갈피 수정</h3>
-        <p>이름을 입력하세요</p>
-        <button onClick={() => setShowEditForm(false)}>취소</button>
-      </Modal>
+      <div 
+      style={{
+        pointerEvents: isEditing ? "none" : "auto", // 편집 모드일 때 위젯 이동 금지(이거 스크롤도 안 됨)
+      }}>
+        <p>Book</p>
+        <button onClick={() => {handleEditClick(1);}} className="cancelSelectorName">zz</button>
+        <Modal isOpen={showEditForm} onClose={() => setShowEditForm(false)}>
+          <h3>책갈피 수정</h3>
+          <p>이름을 입력하세요</p>
+          <button onClick={() => setShowEditForm(false)}>취소</button>
+        </Modal>
+      </div>
     </div>
   );
 };

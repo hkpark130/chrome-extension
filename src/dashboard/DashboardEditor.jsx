@@ -1,19 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import RGL, { WidthProvider } from "react-grid-layout";
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css";
 import { useNavigate } from "react-router-dom";
-import Widget from '../components/Widget';
-import Bookmark from '../components/Bookmark';
-import Calendar from '../components/Calendar';
+import Widget from "@/components/Widget";
+import Bookmark from "@/components/Bookmark";
+import TopSite from "@/components/TopSite";
+import MeetingRoomCalendar from "@/components/MeetingRoomCalendar";
+import { XCircle, Save } from 'lucide-react';
 
 const ReactGridLayout = WidthProvider(RGL);
-const STORAGE_KEY = "dashboard_layout"; 
+const STORAGE_KEY = "dashboard_layout";
 
 const widgets = [
-  { component: 'Widget', label: 'Widget', w: 2, h: 3, content: <Widget isEditing={true}/> },
-  { component: 'Bookmark', label: 'Bookmark', w: 1, h: 2, content: <Bookmark isEditing={true}/> },
-  { component: 'Calendar', label: 'Calendar', w: 3, h: 4, content: <Calendar isEditing={true}/> },
+  { component: "Widget", label: "📊 Widget", w: 2, h: 3, content: <Widget isEditing={true} /> },
+  { component: "TopSite", label: "🔖 자주 방문하는 사이트", w: 2, h: 2, content: <TopSite isEditing={true} /> },
+  { component: "Bookmark", label: "🔖 북마크", w: 2, h: 2, content: <Bookmark isEditing={true} /> },
+  { component: "MeetingRoomCalendar", label: "📅 회의실 예약", w: 5, h: 5, content: <MeetingRoomCalendar isEditing={true} /> },
 ];
 
 const DashboardEditor = () => {
@@ -47,7 +50,7 @@ const DashboardEditor = () => {
       counter: counter
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(savedData));
-    alert("저장완료");
+    alert("✅ 저장 완료!");
     navigate("/");
   };
 
@@ -62,10 +65,7 @@ const DashboardEditor = () => {
   const onDrop = (layout, layoutItem, event) => {
     event.preventDefault();
     const widgetData = event.dataTransfer.getData("application/json");
-    if (!widgetData) {
-      console.error("Error: No widget data found in drag event");
-      return;
-    }
+    if (!widgetData) return;
   
     try {
       const parsedWidget = JSON.parse(widgetData);
@@ -78,6 +78,7 @@ const DashboardEditor = () => {
         h: parsedWidget.h,
         minW: 1,
         minH: 2,
+        resizeHandles: ["s", "w", "e", "n", "sw", "nw", "se", "ne"],
         component: parsedWidget.component, // 🔹 위젯 정보 직접 추가
       };
 
@@ -100,47 +101,21 @@ const DashboardEditor = () => {
 
   const onDragStart = (widget) => (e) => {
     setDraggingWidget(widget);
-    const widgetData = JSON.stringify(widget);
-    e.dataTransfer.setData("application/json", widgetData);
+    e.dataTransfer.setData("application/json", JSON.stringify(widget));
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh' }}>
-      {/* 툴박스 영역 */}
-      <div
-        style={{
-          width: '200px',
-          padding: '10px',
-          borderRight: '1px solid #ccc',
-          background: '#f8f8f8',
-        }}
-      >
-        <div 
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            width: '100%'
-          }}
-        >
-          <h3>툴박스</h3>
-          <button 
-            className='q'
-            onClick={() => {
-              saveToLocalStorage(items, layout);
-            }}
-            style={{
-              position: "relative",
-              height: "40px",
-              padding: "10px",
-              background: "green",
-              color: "white",
-              border: "none",
-              cursor: "pointer",
-              right: "0",
-            }}
-            >
-            <b>💾 저장</b>
+    <div className="flex h-screen bg-gray-100">
+      {/* 🛠 툴박스 영역 */}
+      <div className="w-64 bg-white shadow-lg border-r p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">📌 툴박스</h3>
+          <button
+            onClick={() => {saveToLocalStorage(items, layout)}}
+            className="px-3 py-2 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 transition flex items-center gap-2"
+          >
+            <Save className="w-5 h-5" />
+            <span className="text-sm font-medium">저장</span>
           </button>
         </div>
         {widgets.map((widget) => (
@@ -148,45 +123,34 @@ const DashboardEditor = () => {
             key={widget.component}
             draggable
             onDragStart={onDragStart(widget)}
-            style={{
-              padding: '10px',
-              border: '1px solid #000',
-              marginBottom: '10px',
-              cursor: 'grab',
-            }}
+            className="p-3 bg-gray-200 border rounded-md cursor-grab mb-3 hover:bg-gray-300 transition"
           >
             {widget.label}
           </div>
         ))}
       </div>
 
-      {/* 대시보드 영역 */}
-      <div style={{ flexGrow: 1, padding: '10px' }}>
+      {/* 📌 대시보드 영역 */}
+      <div className="flex-grow p-1">
         <ReactGridLayout
           draggableCancel=".cancelSelectorName"
           autoSize={false}
           preventCollision={false} // 충돌 방지 (자동정렬)
-          verticalCompact={false}
-          style={{ height: '100vh', width: '100%' }}
-          className="layout"
-          layout={layout} // 반응형 적용
+          // verticalCompact={false}
+          className="layout h-screen w-full"
+          layout={layout}
           cols={21}
-          rowHeight={38}
+          rowHeight={30}
           width={800}
           isDroppable={true}
           onDrop={onDrop}
           onDragOver={onDragOver}
-          onLayoutChange={onLayoutChange} // Layout 변경 추적
+          onLayoutChange={onLayoutChange}
           useCSSTransforms={true}
-          droppingItem={draggingWidget ? { 
-            i: '__dropping-elem__', 
-            w: draggingWidget.w, 
-            h: draggingWidget.h 
-          } : { i: '__dropping-elem__', w: 2, h: 2 }}
+          droppingItem={draggingWidget ? { i: "__dropping-elem__", w: draggingWidget.w, h: draggingWidget.h } : { i: "__dropping-elem__", w: 2, h: 2 }}
         >
           {items.map((item) => {
             const widgetData = widgets.find((widget) => widget.component === item.component);
-
             return (
               <div key={item.i} data-grid={layout.find(l => l.i === item.i)}
                 style={{
@@ -197,33 +161,15 @@ const DashboardEditor = () => {
                   justifyContent: 'center',
                 }}
               >
-                <div
-                  className="cancelSelectorName" 
+                <XCircle
                   onClick={() => {
                     removeItem(item.i);
                   }}
-                  style={{
-                    position: "absolute",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    top: "3px",
-                    left: "3px",
-                    background: "lightgray",
-                    color: "white",
-                    border: "white solid 1px",
-                    borderRadius: "50%",
-                    width: "20px",
-                    height: "20px",
-                    fontSize: "14px",
-                    cursor: "pointer",
-                    textAlign: "center",
-                    lineHeight: "20px",
-                    zIndex: 10,
-                  }}
+                  className="cancelSelectorName absolute flex items-center justify-center top-1 left-1 
+                  bg-gray-200 text-red-500 border border-red rounded-full w-5 h-5 
+                  text-sm cursor-pointer text-center leading-5 z-10"
                 >
-                  ✖
-                </div>
+                </XCircle>
                 {widgetData ? widgetData.content : "Unknown Widget"}
               </div>
             );

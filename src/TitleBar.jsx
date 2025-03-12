@@ -1,51 +1,39 @@
 import React from "react";
 import direaLogo from "./assets/logo-direa.png";
-import userIcon from "./assets/user-icon.png"; 
+import userIcon from "./assets/user-icon.png";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 
 const TitleBar = () => {
   const navigate = useNavigate();
   return (
-    <div className="title-container" style={{ borderBottom: "1px solid lightgray" }}>
-      <div className="title-space" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <img 
-          src={userIcon}
-          style={{ width: '65px', height: 'auto' }}
-        />
-        <div style={{ 
-          display: 'flex', 
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '5px'
-        }}>
-          <span>유저 이름</span>
-          <button 
-            style={{
-              padding: '5px 10px',
-              background: 'red',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              fontSize: '14px'
-            }}
+    <header className="w-full flex justify-between items-center px-6 py-1 bg-white border-b shadow-sm">
+      {/* 사용자 정보 */}
+      <div className="flex items-center gap-4">
+        <img src={userIcon} className="w-10 h-10 rounded-full border border-gray-300 shadow-sm" alt="user" />
+        <div className="flex flex-col">
+          <span className="text-sm text-gray-700 font-semibold">유저 이름</span>
+          <Button
+            className="rounded-full bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1 h-auto flex items-center gap-2"
           >
+            <LogOut className="w-4 h-4" />
             로그아웃
-          </button>
+          </Button>
         </div>
       </div>
-
-      <div className="title">
-        <img 
-          src={direaLogo} 
-          className="logo"
-          style={{ width: '150px', cursor: 'pointer', height: 'auto' }}
-          onClick={() => { navigate("/"); }}
+      <div className="flex flex-col items-center">
+        <img
+          src={direaLogo}
+          className="logo w-36 cursor-pointer transition hover:opacity-90"
+          alt="DIREA Logo"
+          onClick={() => navigate("/")}
         />
       </div>
 
-      <div className="title-space"></div>
-    </div>
+      {/* 빈 공간 */}
+      <div className="w-12"></div>
+    </header>
   );
 };
 

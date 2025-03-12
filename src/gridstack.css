@@ -1,5 +1,5 @@
 .react-grid-item.react-grid-placeholder {
-  background-color: gray; /* 기본 드롭 가능한 상태 */
+  background-color: gray;
   transition: background-color 0.3s;
 }
 

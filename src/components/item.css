@@ -3,8 +3,27 @@
     height: 100%;
     overflow: auto; /* 컨텐츠가 넘칠 경우 스크롤바 표시 */
     box-sizing: "border-box";
-    padding: "8px";
+    padding: "1px";
     border: "1px solid #ccc";
     position: relative;
     text-align: center;
+}
+
+.item-header {
+    font-size: 1.125rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 0.25rem;
+    background-color: #f8fafc; /* 밝은 블루 계열 배경 */
+    border-bottom: 2px solid #e2e8f0; /* 은은한 하단 라인 */
+    
+    color:darkgray;
+}
+
+.rbc-toolbar {
+    font-size: 12px;
+}
+  
+.rbc-btn-group button {
+    font-size: 12px;
 }

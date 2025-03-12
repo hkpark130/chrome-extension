@@ -1,19 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import RGL, { WidthProvider } from "react-grid-layout";
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
-import Widget from '../components/Widget';
-import Bookmark from '../components/Bookmark';
-import Calendar from '../components/Calendar';
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css";
+import Widget from "@/components/Widget";
+import Bookmark from "@/components/Bookmark";
+import MeetingRoomCalendar from "@/components/MeetingRoomCalendar";
+import TopSite from "@/components/TopSite";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Settings } from "lucide-react";
 
 const ReactGridLayout = WidthProvider(RGL);
-const STORAGE_KEY = "dashboard_layout"; 
+const STORAGE_KEY = "dashboard_layout";
 
 const widgets = [
-  { component: 'Widget', content: <Widget /> },
-  { component: 'Bookmark', content: <Bookmark /> },
-  { component: 'Calendar', content: <Calendar /> },
+  { component: "Widget", content: <Widget /> },
+  { component: "Bookmark", content: <Bookmark /> },
+  { component: "MeetingRoomCalendar", content: <MeetingRoomCalendar /> },
+  { component: "TopSite", content: <TopSite /> },
 ];
 
 const DashboardView = () => {
@@ -28,42 +32,39 @@ const DashboardView = () => {
   }, []);
 
   return (
-    <div style={{ height: '100vh', padding: '10px' }}>
-      <button onClick={() => navigate("/edit")} 
-        style={{ 
-          position: 'absolute', 
-          top: 5, right: 5, 
-          padding: '8px', 
-          fontSize: '15px', 
-          background: 'orange', 
-          color: 'white', 
-          border: 'none', 
-          cursor: 'pointer',
-          borderRadius: "15px",
-        }}>
-        <b>⚙️ 편집</b>
-      </button>
-
-      <ReactGridLayout
-        className="layout"
-        layout={layout}
-        verticalCompact={false}
-        
-        cols={21}
-        rowHeight={38}
-        width={800}
-        isDraggable={false}
-        isResizable={false}
-      >
-        {layout.map(item => {
-          const widgetData = widgets.find(widget => widget.component === item.component);
-          return (
-            <div key={item.i} data-grid={item} style={{ border: '1px solid #ccc', background: '#eee' }}>
-              {widgetData ? widgetData.content : "Unknown Widget"}
-            </div>
-          );
-        })}
-      </ReactGridLayout>
+    <div className="h-screen bg-gray-100 flex flex-col">
+      <Button onClick={() => navigate("/edit")} className="absolute top-2 right-2 bg-orange-500 text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-orange-600">
+        <Settings className="w-4 h-4" />
+        편집
+      </Button>
+      {/* 대시보드 컨텐츠 */}
+      <main className="flex-1 p-1">
+        <ReactGridLayout
+          className="layout"
+          layout={layout}
+          verticalCompact={false}
+          cols={21}
+          rowHeight={38}
+          width={800}
+          isDraggable={false}
+          isResizable={false}
+        >
+          {layout.map((item) => {
+            const widgetData = widgets.find(
+              (widget) => widget.component === item.component
+            );
+            return (
+              <div
+                key={item.i}
+                data-grid={item}
+                className="border border-gray-300 bg-white shadow-md rounded-lg"
+              >
+                {widgetData ? widgetData.content : "Unknown Widget"}
+              </div>
+            );
+          })}
+        </ReactGridLayout>
+      </main>
     </div>
   );
 };

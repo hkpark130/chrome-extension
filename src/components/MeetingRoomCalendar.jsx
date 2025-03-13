@@ -27,7 +27,7 @@ const messages = {
   showMore: (total) => `+ 더 보기 (${total})`,
 };
 
-function MeetingRoomCalendar({ isEditing }) {
+function MeetingRoomCalendar({ isEditing, isBordered }) {
   const [counter, setCounter] = useState(0);
   const [view, setView] = useState("month");
   const [events, setEvents] = useState([]);
@@ -214,7 +214,9 @@ function MeetingRoomCalendar({ isEditing }) {
 
   return (
     <div className="item-style">
-      <h2 className="item-header">회의실 예약</h2>
+      {isBordered && 
+        <div className="item-header">회의실 예약</div>
+      }
       {/* 달력 영역 */}
       <div style={{ height: '500px', marginBottom: '30px', pointerEvents: isEditing ? "none" : "auto" }}>
         <Calendar

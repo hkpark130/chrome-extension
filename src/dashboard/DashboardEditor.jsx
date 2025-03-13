@@ -7,18 +7,26 @@ import Widget from "@/components/Widget";
 import Bookmark from "@/components/Bookmark";
 import TopSite from "@/components/TopSite";
 import ChatGPT from "@/components/ChatGPTSearch";
+import LunchMenu from "@/components/LunchMenu";
 import MeetingRoomCalendar from "@/components/MeetingRoomCalendar";
-import { XCircle, Save } from 'lucide-react';
+import { XCircle, Save, PencilRuler, CheckSquare, Square } from 'lucide-react';
 
 const ReactGridLayout = WidthProvider(RGL);
 const STORAGE_KEY = "dashboard_layout";
 
 const widgets = [
-  { component: "Widget", label: "📊 Widget", w: 2, h: 3, content: <Widget isEditing={true} /> },
-  { component: "TopSite", label: "🔖 자주 방문하는 사이트", w: 2, h: 2, content: <TopSite isEditing={true} /> },
-  { component: "Bookmark", label: "🔖 북마크", w: 2, h: 2, content: <Bookmark isEditing={true} /> },
-  { component: "ChatGPT", label: "🔍 ChatGPT", w: 2, h: 2, content: <ChatGPT isEditing={true} /> },
-  { component: "MeetingRoomCalendar", label: "📅 회의실 예약", w: 5, h: 5, content: <MeetingRoomCalendar isEditing={true} /> },
+  { component: "Widget", label: "📊 Widget", w: 2, h: 3, isBordered: true,
+    content: (props) => <Widget isEditing={true} isBordered={props.isBordered} /> },
+  { component: "TopSite", label: "🔖 자주 방문하는 사이트", w: 7, h: 4, isBordered: true,
+    content: (props) => <TopSite isEditing={true} isBordered={props.isBordered} /> },
+  { component: "Bookmark", label: "🔖 북마크", w: 7, h: 4, isBordered: true,
+    content: (props) => <Bookmark isEditing={true} isBordered={props.isBordered} /> },
+  { component: "ChatGPT", label: "🤖 ChatGPT", w: 6, h: 3, isBordered: true,
+    content: (props) => <ChatGPT isEditing={true} isBordered={props.isBordered} /> },
+  { component: "MeetingRoomCalendar", label: "📅 회의실 예약", w: 7, h: 9, isBordered: true,
+    content: (props) => <MeetingRoomCalendar isEditing={true} isBordered={props.isBordered} /> },
+  { component: "LunchMenu", label: "🍱 점심추천", w: 2, h: 3, isBordered: true,
+    content: (props) => <LunchMenu isEditing={true} isBordered={props.isBordered} /> },
 ];
 
 const DashboardEditor = () => {
@@ -44,6 +52,7 @@ const DashboardEditor = () => {
         const existingLayoutItem = newLayout.find(layoutItem => layoutItem.i === item.i);
         if (existingLayoutItem) {
             existingLayoutItem.component = item.component;
+            existingLayoutItem.isBordered = item.isBordered;
         } 
     });
     const savedData = {
@@ -59,6 +68,18 @@ const DashboardEditor = () => {
   const removeItem = (id) => {
     const updatedItems = items.filter(item => item.i !== id);
     const updatedLayout = layout.filter(item => item.i !== id);
+
+    setItems(updatedItems);
+    setLayout(updatedLayout);
+  };
+
+  const borderedItem = (id) => {
+    const updatedItems = items.map(item => 
+      item.i === id ? { ...item, isBordered: !item.isBordered } : item
+    );
+    const updatedLayout = layout.map(item => 
+      item.i === id ? { ...item, isBordered: !item.isBordered } : item
+    );
 
     setItems(updatedItems);
     setLayout(updatedLayout);
@@ -82,6 +103,7 @@ const DashboardEditor = () => {
         minH: 2,
         resizeHandles: ["s", "w", "e", "n", "sw", "nw", "se", "ne"],
         component: parsedWidget.component, // 🔹 위젯 정보 직접 추가
+        isBordered: parsedWidget.isBordered,
       };
 
       setItems(prev => [...prev, newItem]);
@@ -108,13 +130,16 @@ const DashboardEditor = () => {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* 🛠 툴박스 영역 */}
+      {/* 툴박스 영역 */}
       <div className="w-64 bg-white shadow-lg border-r p-4">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold" style={{ fontFamily: "'Gamja Flower', sans-serif", fontSize: "1.7rem"}}>📌 툴박스</h3>
+          <div className="flex items-center text-lg font-semibold" style={{ fontFamily: "'Gamja Flower', sans-serif", fontSize: "1.7rem"}}>
+            <PencilRuler className="w-5 h-5" /> 
+            툴박스
+          </div>
           <button
             onClick={() => {saveToLocalStorage(items, layout)}}
-            className="px-3 py-2 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 transition flex items-center gap-2"
+            className="px-3 py-2 bg-green-500 text-white border-[2px] border-cyan-500 shadow-md hover:bg-green-600 transition flex items-center gap-2 rounded-full"
           >
             <Save className="w-5 h-5" />
             <span className="text-sm font-medium" style={{ fontFamily: "'Gamja Flower', sans-serif", fontSize: "1.1rem"}}>저장</span>
@@ -155,24 +180,35 @@ const DashboardEditor = () => {
             const widgetData = widgets.find((widget) => widget.component === item.component);
             return (
               <div key={item.i} data-grid={layout.find(l => l.i === item.i)}
-                style={{
+                style={item.isBordered ? {
                   border: '1px solid #ccc',
                   background: '#eee',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
+                }: {}}
               >
                 <XCircle
                   onClick={() => {
                     removeItem(item.i);
                   }}
                   className="cancelSelectorName absolute flex items-center justify-center top-1 left-1 
-                  bg-gray-200 text-red-500 border border-red rounded-full w-5 h-5 
-                  text-sm cursor-pointer text-center leading-5 z-10"
+                  text-red-500  rounded-full w-5 h-5 
+                  cursor-pointer leading-5 z-10"
                 >
                 </XCircle>
-                {widgetData ? widgetData.content : "Unknown Widget"}
+
+                <div 
+                  onClick={() => {
+                    borderedItem(item.i);
+                  }}
+                  className="cancelSelectorName absolute top-1 left-6 flex items-center justify-center cursor-pointer z-10"
+                >
+                  {item.isBordered ? (
+                    <CheckSquare className="text-green-500 w-5 h-5" />
+                  ) : (
+                    <Square className="text-gray-500 w-5 h-5" />
+                  )}
+                </div>
+
+                {widgetData ? widgetData.content({ isBordered: item.isBordered }) : "Unknown Widget"}
               </div>
             );
           })}

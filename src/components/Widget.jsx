@@ -1,7 +1,7 @@
 import React from "react";
 import './item.css';
 
-const Widget = ({ isEditing }) => {
+const Widget = ({ isEditing, isBordered }) => {
   return (
     <div
       className='item-style'

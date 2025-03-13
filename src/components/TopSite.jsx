@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './item.css';
 
-const TopSite = ({ isEditing }) => {
+const TopSite = ({ isEditing, isBordered }) => {
   const [topSites, setTopSites] = useState([]);
 
   useEffect(() => {
@@ -28,7 +28,9 @@ const TopSite = ({ isEditing }) => {
       style={{
         pointerEvents: isEditing ? "none" : "auto", // 편집 모드일 때 위젯 이동 금지(이거 스크롤도 안 됨)
       }}>
-        <div className="item-header">자주 방문한 사이트</div>
+        {isBordered && 
+          <div className="item-header">자주 방문한 사이트</div>
+        }
         <div className="flex justify-center gap-4 flex-wrap">
           {topSites.map((site, index) => (
             <a 

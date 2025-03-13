@@ -8,7 +8,7 @@ import { MoreVertical, Plus, ChevronLeft, ChevronRight, Search } from "lucide-re
 const STORAGE_KEY = "bookmarks";
 const itemsPerPage = 6;
 
-const Bookmark = ({ isEditing }) => {
+const Bookmark = ({ isEditing, isBordered }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [bookmarks, setBookmarks] = useState([]);
@@ -47,10 +47,6 @@ const Bookmark = ({ isEditing }) => {
   const saveBookmarks = (updatedBookmarks) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedBookmarks));
     setBookmarks(updatedBookmarks);
-  };
-
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
   };
 
   const filteredBookmarks = bookmarks.filter(bookmark =>
@@ -140,10 +136,9 @@ const Bookmark = ({ isEditing }) => {
       style={{
         pointerEvents: isEditing ? "none" : "auto", // 편집 모드일 때 위젯 이동 금지(이거 스크롤도 안 됨)
       }}>
-        <div className="item-header">
-          즐겨찾기
-        </div>
-
+        {isBordered && 
+          <div className="item-header">즐겨찾기</div>
+        }
         <div className="flex justify-center mb-1">
           <div className="relative w-96">
             {/* 🔍 검색 아이콘 (왼쪽) */}
@@ -179,7 +174,7 @@ const Bookmark = ({ isEditing }) => {
                 onClick={() => handleEditClick(bookmark.id)}
                 className="
                     absolute top-1 right-0 text-gray-500 hidden group-hover:flex 
-                    items-center justify-center rounded-full
+                    items-center justify-center rounded-full cursor-pointer
                     bg-transparent hover:bg-gray-400/50 transition-colors
                   " 
                 />
@@ -235,8 +230,8 @@ const Bookmark = ({ isEditing }) => {
           className="border border-gray-300 p-2 rounded w-full mb-4"
         />
         <div className="flex justify-end space-x-2">
-          <Button onClick={() => setShowAddForm(false)} className="bg-gray-500 text-white py-2 px-4 rounded">취소</Button>
-          <Button onClick={handleAddBookmark} className="bg-blue-500 text-white py-2 px-4 rounded">추가</Button>
+          <Button onClick={() => setShowAddForm(false)} className="bg-gray-500 text-white py-2 px-4 rounded-full">취소</Button>
+          <Button onClick={handleAddBookmark} className="bg-blue-500 text-white py-2 px-4 rounded-full">추가</Button>
         </div>
       </Modal>
 
@@ -260,9 +255,13 @@ const Bookmark = ({ isEditing }) => {
           className="border border-gray-300 p-2 rounded w-full mb-4"
         />
         <div className="flex justify-end space-x-2">
-          <Button onClick={handleDeleteBookmark} className="bg-red-500 text-white py-2 px-4 rounded">삭제</Button>
-          <Button onClick={() => setShowEditForm(false)} className="bg-gray-500 text-white py-2 px-4 rounded">취소</Button>
-          <Button onClick={handleSaveEdit} className="bg-blue-500 text-white py-2 px-4 rounded">저장</Button>
+          <Button onClick={handleDeleteBookmark} 
+            className="bg-red-500 text-white py-2 px-4 rounded-full shadow-md hover:bg-red-600 transition">삭제</Button>
+          <Button onClick={() => setShowEditForm(false)} 
+            className="border-[2px] border-cyan-500 text-cyan-600 py-2 px-4 rounded-full shadow-md 
+              bg-white hover:bg-cyan-50 transition">취소</Button>
+          <Button onClick={handleSaveEdit} 
+            className="bg-cyan-600 text-white py-2 px-4 rounded-full shadow-md hover:bg-cyan-700 transition">저장</Button>
         </div>
       </Modal>
     </div>

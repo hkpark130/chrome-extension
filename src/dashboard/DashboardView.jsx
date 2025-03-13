@@ -6,6 +6,7 @@ import Widget from "@/components/Widget";
 import Bookmark from "@/components/Bookmark";
 import MeetingRoomCalendar from "@/components/MeetingRoomCalendar";
 import TopSite from "@/components/TopSite";
+import ChatGPT from "@/components/ChatGPTSearch";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Settings } from "lucide-react";
@@ -18,6 +19,7 @@ const widgets = [
   { component: "Bookmark", content: <Bookmark /> },
   { component: "MeetingRoomCalendar", content: <MeetingRoomCalendar /> },
   { component: "TopSite", content: <TopSite /> },
+  { component: "ChatGPT", content: <ChatGPT /> },
 ];
 
 const DashboardView = () => {

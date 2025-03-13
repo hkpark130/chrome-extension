@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import Widget from "@/components/Widget";
 import Bookmark from "@/components/Bookmark";
 import TopSite from "@/components/TopSite";
+import ChatGPT from "@/components/ChatGPTSearch";
 import MeetingRoomCalendar from "@/components/MeetingRoomCalendar";
 import { XCircle, Save } from 'lucide-react';
 
@@ -16,6 +17,7 @@ const widgets = [
   { component: "Widget", label: "📊 Widget", w: 2, h: 3, content: <Widget isEditing={true} /> },
   { component: "TopSite", label: "🔖 자주 방문하는 사이트", w: 2, h: 2, content: <TopSite isEditing={true} /> },
   { component: "Bookmark", label: "🔖 북마크", w: 2, h: 2, content: <Bookmark isEditing={true} /> },
+  { component: "ChatGPT", label: "🔍 ChatGPT", w: 2, h: 2, content: <ChatGPT isEditing={true} /> },
   { component: "MeetingRoomCalendar", label: "📅 회의실 예약", w: 5, h: 5, content: <MeetingRoomCalendar isEditing={true} /> },
 ];
 

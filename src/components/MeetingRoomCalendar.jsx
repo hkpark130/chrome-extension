@@ -49,14 +49,29 @@ function MeetingRoomCalendar({ isEditing }) {
 
   const slotPropGetter = (date) => {
     const hour = moment(date).hour();
-    if (hour < 9 || hour >= 18) {
+    const minute = moment(date).minute();
+  
+    const isLunchTime =
+      (hour === 12 && minute >= 30) ||
+      (hour === 13 && minute < 30);
+  
+    const isLunchTimeLabel = hour === 12 && minute === 30;
+  
+    const isOffTime = hour < 9 || hour >= 18;
+  
+    if (isLunchTimeLabel) {
       return {
-        style: {
-          backgroundColor: '#e0e0e0', // 연한 회색
-        },
+        className: 'slot-lunch-label',
       };
     }
-    return {}; // 기본 스타일 유지
+  
+    if (isLunchTime || isOffTime) {
+      return {
+        className: 'slot-lunch-bg',
+      };
+    }
+  
+    return {};
   };
 
   useEffect(() => {
@@ -205,6 +220,7 @@ function MeetingRoomCalendar({ isEditing }) {
         <Calendar
           localizer={localizer}
           events={events}
+          min={new Date(1970, 1, 1, 8, 0)}
           startAccessor="start"
           endAccessor="end"
           selectable={view === "month"}

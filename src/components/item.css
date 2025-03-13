@@ -7,17 +7,16 @@
     border: "1px solid #ccc";
     position: relative;
     text-align: center;
+    border-radius: 5px;
 }
 
 .item-header {
-    font-size: 1.125rem;
-    font-weight: 600;
+    font-family: "Gamja Flower", sans-serif;
     text-align: center;
     margin-bottom: 0.25rem;
-    background-color: #f8fafc; /* 밝은 블루 계열 배경 */
-    border-bottom: 2px solid #e2e8f0; /* 은은한 하단 라인 */
-    
-    color:darkgray;
+    background-color: #1B6686;
+    border-bottom: 2px solid #e2e8f0; 
+    color: #f8fafc;
 }
 
 .rbc-toolbar {
@@ -26,4 +25,35 @@
   
 .rbc-btn-group button {
     font-size: 12px;
+}
+
+.rbc-time-gutter .rbc-time-slot {
+    background-color: transparent !important;
+}
+
+.rbc-time-gutter .rbc-time-slot::after {
+    content: none !important;
+}
+
+.slot-lunch-bg {
+    background-color: #e0e0e0 !important;
+}
+  
+  /* 점심시간 강조 텍스트 */
+.slot-lunch-label {
+    background-color: #e0e0e0 !important;
+    position: relative;
+}
+  .slot-lunch-label::after {
+    content: "🍱 점심시간";
+    position: absolute;
+    top: 2px;
+    left: 4px;
+    font-size: 11px;
+    background-color: #fff3cd;
+    color: #d2691e;
+    padding: 2px 6px;
+    border-radius: 4px;
+    /* z-index: 1; */
+    pointer-events: none;
 }

@@ -16,6 +16,7 @@ const TitleBar = () => {
           <span className="text-sm text-gray-700 font-semibold">유저 이름</span>
           <Button
             className="rounded-full bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1 h-auto flex items-center gap-2"
+            style={{ fontFamily: "'Gamja Flower', sans-serif", fontSize: "1.1rem"}}
           >
             <LogOut className="w-4 h-4" />
             로그아웃

@@ -111,13 +111,13 @@ const DashboardEditor = () => {
       {/* 🛠 툴박스 영역 */}
       <div className="w-64 bg-white shadow-lg border-r p-4">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">📌 툴박스</h3>
+          <h3 className="text-lg font-semibold" style={{ fontFamily: "'Gamja Flower', sans-serif", fontSize: "1.7rem"}}>📌 툴박스</h3>
           <button
             onClick={() => {saveToLocalStorage(items, layout)}}
             className="px-3 py-2 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 transition flex items-center gap-2"
           >
             <Save className="w-5 h-5" />
-            <span className="text-sm font-medium">저장</span>
+            <span className="text-sm font-medium" style={{ fontFamily: "'Gamja Flower', sans-serif", fontSize: "1.1rem"}}>저장</span>
           </button>
         </div>
         {widgets.map((widget) => (

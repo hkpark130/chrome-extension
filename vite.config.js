@@ -11,6 +11,7 @@ export default defineConfig({
     },
   },
   server: {
+    host: true,
     proxy: {
       '/api': { // 백엔드 API 엔드포인트에 대한 프록시 설정
         target: 'http://your-backend-url.com',

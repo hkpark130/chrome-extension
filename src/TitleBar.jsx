@@ -1,21 +1,43 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import direaLogo from "@/assets/logo-direa.png";
 import userIcon from "@/assets/user-icon.png";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogOut, LogIn } from "lucide-react";
+import { test } from "@/api/api.js";
 
 const TitleBar = () => {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(false);
 
+  useEffect(() => {
+    // 로그인 여부 확인 (httpOnly 쿠키는 JS에서 직접 읽을 수 없으므로 localStorage 사용)
+    setIsLogin(localStorage.getItem("isLogin") === "true");
+  }, []);
+
   const handleAuthAction = () => {
     if (isLogin) {
-      alert("로그아웃 되었습니다.");  // ✅ 로그아웃 클릭 시
+      alert("로그아웃 되었습니다.");
+      localStorage.removeItem("isLogin");
+      navigate("/");
+      document.cookie = "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
       setIsLogin(false);
     } else {
-      alert("로그인 페이지로 이동합니다.");  // ✅ 로그인 클릭 시
-      setIsLogin(true);
+      // ✅ 로그인 버튼 클릭 시 Keycloak 로그인 페이지로 이동
+      window.location.href = "http://192.168.2.59:8080/realms/sso/protocol/openid-connect/auth"
+          + "?client_id=chrome-ext"
+          + "&response_type=code"
+          + "&scope=openid"
+          + "&redirect_uri=http://192.168.2.47:5173/callback";
+    }
+  };
+
+  const handleTest = async () => {
+    try {
+      const res = await test();
+      console.log("res: ", res);
+    } catch (err) {
+      console.log("에러뜸: ", err);
     }
   };
 
@@ -42,6 +64,12 @@ const TitleBar = () => {
               ? <LogOut className="w-4 h-4 mr-1" /> 
               : <LogIn className="w-4 h-4 mr-1" />}
             {isLogin ? "로그아웃" : "로그인"}
+          </Button>
+
+          <Button
+            onClick={handleTest}
+          >
+            {"테스트"}
           </Button>
         </div>
       </div>

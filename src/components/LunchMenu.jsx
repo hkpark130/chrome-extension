@@ -11,6 +11,15 @@ const lunchOptions = [
   { name: "돈까스", weight: 4 },
   { name: "바지락 칼국수", weight: 3 },
   { name: "짬뽕", weight: 3 },
+  { name: "제육", weight: 3 },
+  { name: "냉면", weight: 3 },
+  { name: "햄버거", weight: 3 },
+  { name: "포케", weight: 3 },
+  { name: "분식", weight: 3 },
+  { name: "엽떡", weight: 3 },
+  { name: "국밥", weight: 3 },
+  { name: "우동", weight: 3 },
+  { name: "라멘", weight: 3 },
 ];
 
 const LunchMenu = ({ isEditing, isBordered }) => {

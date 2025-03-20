@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { LogOut, LogIn } from "lucide-react";
 import { test } from "@/api/api.js";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://192.168.2.72:8000";
+
 const TitleBar = () => {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(false);
@@ -24,11 +26,11 @@ const TitleBar = () => {
       setIsLogin(false);
     } else {
       // ✅ 로그인 버튼 클릭 시 Keycloak 로그인 페이지로 이동
-      window.location.href = "http://192.168.2.59:8080/realms/sso/protocol/openid-connect/auth"
+      window.location.href = "https://keycloak.direa.synology.me/realms/sso/protocol/openid-connect/auth"
           + "?client_id=chrome-ext"
           + "&response_type=code"
           + "&scope=openid"
-          + "&redirect_uri=http://192.168.2.47:5173/callback";
+          + `&redirect_uri=${API_BASE_URL}/login/oauth2/code/keycloak`;
     }
   };
 

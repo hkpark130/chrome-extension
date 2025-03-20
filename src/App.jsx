@@ -2,8 +2,7 @@ import React from "react";
 import { HashRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 import DashboardEditor from "./dashboard/DashboardEditor";
 import DashboardView from "./dashboard/DashboardView";
-import TitleBar from "./TitleBar"; 
-import Callback from "./pages/Callback";
+import TitleBar from "./TitleBar";
 import './gridstack.css';
 
 function App() {
@@ -12,7 +11,6 @@ function App() {
       <div>
         <TitleBar />
         <Routes>
-          <Route path="/callback" element={<Callback />} />
           <Route path="/" element={<DashboardView />} />
           <Route path="/edit" element={<DashboardEditor />} />
         </Routes>

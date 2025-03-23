@@ -37,13 +37,6 @@ const DashboardView = () => {
 
   return (
     <div className="h-screen bg-gray-100 flex flex-col">
-      <Button onClick={() => navigate("/edit")} 
-        style={{ fontFamily: "'Gamja Flower', sans-serif", fontSize: "1.27rem" }}
-        className="absolute top-2 right-2 border-[2px] border-cyan-500 text-cyan-600 py-2 px-4 rounded-full shadow-md 
-              bg-white hover:bg-cyan-50 transition">
-        <Settings className="w-4 h-4" />
-        편집
-      </Button>
       {/* 대시보드 컨텐츠 */}
       <main className="flex-1 p-1">
         {layout.length === 0 ? (

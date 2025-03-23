@@ -24,7 +24,7 @@ const messages = {
   date: '날짜',
   time: '시간',
   event: '이벤트',
-  showMore: (total) => `+ 더 보기 (${total})`,
+  showMore: (total) => `+ 외 ${total}건`,
 };
 
 function MeetingRoomCalendar({ isEditing, isBordered }) {
@@ -234,6 +234,10 @@ function MeetingRoomCalendar({ isEditing, isBordered }) {
           defaultView="month"
           views={['month', 'week']}
           style={{ height: '100%' }}
+          formats={{
+            monthHeaderFormat: (date, culture, localizer) =>
+              moment(date).format('M월'),
+          }}
         />
         {view === "week" && (
           <div className="absolute inset-0 pointer-events-none" />

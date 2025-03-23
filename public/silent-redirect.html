@@ -1,0 +1,15 @@
+<!-- public/silent-redirect.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Silent Redirect</title>
+</head>
+<body>
+  <script>
+    window.onload = function () {
+      window.opener?.postMessage('oidc-silent-renew-done', window.location.origin);
+    };
+  </script>
+</body>
+</html>

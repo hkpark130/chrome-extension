@@ -3,21 +3,27 @@ import OpenAI from "openai";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://192.168.2.72:8000";
 
-// ✅ Axios 인스턴스 생성 (모든 API 요청에 쿠키 포함)
+// ✅ Axios 인스턴스 생성
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
 });
 
-// ✅ 401 응답 처리: Keycloak 로그인 페이지로 리디렉트
-axiosInstance.interceptors.response.use(
-    response => response,
+export const setAccessToken = async (token) => {
+  axiosInstance.interceptors.request.use(
+    (config) => {
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      config.withCredentials = true;
+      return config;
+    },
     (error) => {
-        return Promise.reject(error);
+      return Promise.reject(error);
     }
-);
+  );
+}
 
 export default axiosInstance;
-
 
 // ✅ 🔹 OpenAI API 요청 (GPT 호출)
 export const fetchOpenAIResponse = async (query) => {
@@ -44,16 +50,16 @@ export const fetchOpenAIResponse = async (query) => {
 };
 
 // ✅ 🔹 북마크 테스트 API 요청
-export const test = async (accessToken) => {
-    try {
-      const response = await axiosInstance.get("/bookmarks/1", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      return response.data;
-    } catch (error) {
-      console.error("실패: ", error);
-      throw error;
-    }
-};
+// export const test = async (accessToken) => {
+//     try {
+//       const response = await axiosInstance.get("/bookmarks/1", {
+//         headers: {
+//           Authorization: `Bearer ${accessToken}`,
+//         },
+//       });
+//       return response.data;
+//     } catch (error) {
+//       console.error("실패: ", error);
+//       throw error;
+//     }
+// };

@@ -3,7 +3,6 @@ import RGL, { WidthProvider } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { useNavigate } from "react-router-dom";
-import Widget from "@/components/Widget";
 import Bookmark from "@/components/Bookmark";
 import TopSite from "@/components/TopSite";
 import ChatGPT from "@/components/ChatGPTSearch";
@@ -15,8 +14,6 @@ const ReactGridLayout = WidthProvider(RGL);
 const STORAGE_KEY = "dashboard_layout";
 
 const widgets = [
-  { component: "Widget", label: "📊 Widget", w: 2, h: 3, isBordered: true,
-    content: (props) => <Widget isEditing={true} isBordered={props.isBordered} /> },
   { component: "TopSite", label: "🔖 자주 방문하는 사이트", w: 7, h: 4, isBordered: true,
     content: (props) => <TopSite isEditing={true} isBordered={props.isBordered} /> },
   { component: "Bookmark", label: "🔖 북마크", w: 7, h: 4, isBordered: true,
@@ -132,18 +129,23 @@ const DashboardEditor = () => {
     <div className="flex h-screen bg-gray-100">
       {/* 툴박스 영역 */}
       <div className="w-64 bg-white shadow-lg border-r p-4">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center text-lg font-semibold" style={{ fontFamily: "'Gamja Flower', sans-serif", fontSize: "1.7rem"}}>
-            <PencilRuler className="w-5 h-5" /> 
+        <div className="flex justify-between items-center mb-1">
+          <div className="flex items-center font-semibold" style={{ fontFamily: "'Gamja Flower', sans-serif", fontSize: "1.3rem"}}>
+            <PencilRuler /> 
             툴박스
           </div>
           <button
             onClick={() => {saveToLocalStorage(items, layout)}}
-            className="px-3 py-2 bg-green-500 text-white border-[2px] border-cyan-500 shadow-md hover:bg-green-600 transition flex items-center gap-2 rounded-full"
+            className="px-3 py-2 bg-green-500 text-white border-[2px] border-green-500 shadow-md hover:bg-green-600 transition flex items-center gap-2 rounded-full"
           >
             <Save className="w-5 h-5" />
             <span className="text-sm font-medium" style={{ fontFamily: "'Gamja Flower', sans-serif", fontSize: "1.1rem"}}>저장</span>
           </button>
+        </div>
+        <div>
+          <p className="text-sm text-gray-500 text-center mb-1">
+            위젯을 드래그&드랍 해주세요.
+          </p>
         </div>
         {widgets.map((widget) => (
           <div

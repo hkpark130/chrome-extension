@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import './item.css';
 import { isChromeExtension } from "@/api/utils";
+import axiosInstance, { setAccessToken } from "@/api/api";
 import Modal from './Modal';
 import { Button } from "@/components/ui/button";
 import { MoreVertical, Plus, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { useAuth } from "react-oidc-context";
 
-const STORAGE_KEY = "bookmarks";
 const itemsPerPage = 6;
 
 const Bookmark = ({ isEditing, isBordered }) => {
+  const auth = useAuth();
+  const userId = auth.user?.profile?.sub;
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [bookmarks, setBookmarks] = useState([]);
@@ -18,35 +21,26 @@ const Bookmark = ({ isEditing, isBordered }) => {
   const [newBookmark, setNewBookmark] = useState({ name: '', url: '' });
 
   useEffect(() => {
-    fetchBookmarks();
-  }, []);
+    if (auth.isAuthenticated) {  // 🔹 로그인된 경우만 북마크 가져오기
+      setAccessToken(auth.user?.access_token);
+      fetchBookmarks();
+    }
+  }, [auth.isAuthenticated]);
 
   const normalizeURL = (url) => {
     if (!/^https?:\/\//i.test(url)) { // URL이 http:// 또는 https:// 로 시작하지 않으면
-      alert("입력한 URL에 프로토콜(http:// 또는 https://)이 없어서 http:// 가 자동으로 추가되었습니다.");
       return "http://" + url; // 기본적으로 http 추가
     }
     return url;
   };
   
-  // 📌 북마크 데이터 불러오기 (localStorage 사용)
-  const fetchBookmarks = () => {
-    const storedBookmarks = localStorage.getItem(STORAGE_KEY);
-    if (storedBookmarks) {
-      setBookmarks(JSON.parse(storedBookmarks));
-    } else {
-      const defaultBookmarks = [
-        { id: 1, name: 'Google', url: 'https://www.google.com' },
-        { id: 2, name: 'Naver', url: 'https://www.naver.com' },
-      ];
-      saveBookmarks(defaultBookmarks);
+  const fetchBookmarks = async () => {
+    try {
+      const res = await axiosInstance.get(`/bookmarks/${userId}`);
+      setBookmarks(res.data.data);
+    } catch (error) {
+      console.error("✅ 북마크 불러오기 실패: ", error);
     }
-  };
-
-  // 📌 북마크 데이터 저장 (localStorage 사용)
-  const saveBookmarks = (updatedBookmarks) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedBookmarks));
-    setBookmarks(updatedBookmarks);
   };
 
   const filteredBookmarks = bookmarks.filter(bookmark =>
@@ -72,22 +66,53 @@ const Bookmark = ({ isEditing, isBordered }) => {
     setEditedBookmark({ ...editedBookmark, [e.target.name]: e.target.value });
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (editedBookmark.name && editedBookmark.url) {
-      const normalizedUrl = normalizeURL(editedBookmark.url);
-      const updatedBookmarks = bookmarks.map(bookmark =>
-        bookmark.id === editedBookmark.id ? { ...editedBookmark, url: normalizedUrl } : bookmark
-      );
-      saveBookmarks(updatedBookmarks);
-      setShowEditForm(false);
-      setEditedBookmark({ id: null, name: '', url: '' });
+      try {
+        const normalizedUrl = normalizeURL(editedBookmark.url);
+        const updatedBookmark = {
+          userId,
+          name: editedBookmark.name,
+          url: normalizedUrl,
+        };
+  
+        // 🔹 백엔드 API 호출 (북마크 수정 요청)
+        const res = await axiosInstance.put(`/bookmarks/${userId}/${editedBookmark.id}`, updatedBookmark);
+  
+        // 🔹 북마크 배열 업데이트
+        setBookmarks((prev) =>
+          prev.map((bookmark) =>
+            bookmark.id === editedBookmark.id ? res.data.data : bookmark
+          )
+        );
+  
+        // 🔹 모달 닫기 & 상태 초기화
+        setShowEditForm(false);
+        setEditedBookmark({ id: null, name: "", url: "" });
+  
+      } catch (error) {
+        console.error("✅ 북마크 수정 실패: ", error);
+      }
     }
   };
 
-  const handleDeleteBookmark = () => {
-    const updatedBookmarks = bookmarks.filter(bookmark => bookmark.id !== editedBookmark.id);
-    saveBookmarks(updatedBookmarks);
-    setShowEditForm(false);
+  const handleDeleteBookmark = async () => {
+    if (!editedBookmark.id) return;  // ✅ 북마크 ID 확인
+  
+    try {
+      // ✅ 백엔드 DELETE 요청
+      await axiosInstance.delete(`/bookmarks/${userId}/${editedBookmark.id}`);
+  
+      // ✅ UI에서 삭제된 북마크 반영
+      setBookmarks((prev) => prev.filter((bookmark) => bookmark.id !== editedBookmark.id));
+  
+      // ✅ 모달 닫기 & 상태 초기화
+      setShowEditForm(false);
+      setEditedBookmark({ id: null, name: "", url: "" });
+  
+    } catch (error) {
+      console.error("🚨 북마크 삭제 실패:", error);
+    }
   };
 
   const handleAddClick = () => {
@@ -98,14 +123,21 @@ const Bookmark = ({ isEditing, isBordered }) => {
     setNewBookmark({ ...newBookmark, [e.target.name]: e.target.value });
   };
 
-  const handleAddBookmark = () => {
+  const handleAddBookmark = async () => {
     if (newBookmark.name && newBookmark.url) {
-      const normalizedUrl = normalizeURL(newBookmark.url);
-      const newId = Math.max(0, ...bookmarks.map(b => b.id)) + 1;
-      const updatedBookmarks = [...bookmarks, { ...newBookmark, id: newId, url: normalizedUrl }];
-      saveBookmarks(updatedBookmarks);
-      setShowAddForm(false);
-      setNewBookmark({ name: '', url: '' });
+      try {
+        const normalizedUrl = normalizeURL(newBookmark.url);
+        const res = await axiosInstance.post("/bookmarks", {
+          userId,
+          name: newBookmark.name,
+          url: normalizedUrl,
+        });
+        setBookmarks([...bookmarks, res.data.data]);
+        setShowAddForm(false);
+        setNewBookmark({ name: "", url: "" });
+      } catch (error) {
+        console.error("✅ 북마크 추가 실패: ", error);
+      }
     }
   };
 
@@ -139,73 +171,81 @@ const Bookmark = ({ isEditing, isBordered }) => {
         {isBordered && 
           <div className="item-header">즐겨찾기</div>
         }
-        <div className="flex justify-center mb-1">
-          <div className="relative w-96">
-            {/* 🔍 검색 아이콘 (왼쪽) */}
-            <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"/>
-            
-            <input
-              type="text"
-              placeholder="북마크 명을 입력하세요."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="
-                w-full pl-10 pr-4 py-2
-                bg-gray-100 border border-gray-300
-                focus:ring-2 focus:ring-gray-300
-                rounded-full text-gray-700 outline-none transition-all
-                shadow-sm focus:bg-white"
-            />
-          </div>
-        </div>
-
-        <div className="flex justify-center gap-4 flex-wrap">
-          {displayedBookmarks.map((bookmark, index) => (
-            <div key={index} 
-              className="relative flex flex-col items-center w-20 p-2 rounded-lg transition hover:bg-gray-200 group">
-              <a href={bookmark.url} target="_blank" 
-                 rel="noopener noreferrer" className="flex flex-col items-center w-full">
-                <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
-                  <img src={faviconURL(bookmark.url)} className="w-8 h-8 object-contain" alt={bookmark.name} />
-                </div>
-                <span className="mt-2 text-sm text-center truncate w-full">{bookmark.name}</span>
-              </a>
-              <MoreVertical size={20} 
-                onClick={() => handleEditClick(bookmark.id)}
-                className="
-                    absolute top-1 right-0 text-gray-500 hidden group-hover:flex 
-                    items-center justify-center rounded-full cursor-pointer
-                    bg-transparent hover:bg-gray-400/50 transition-colors
-                  " 
+        {!auth.isAuthenticated ? (
+          <p className="text-center text-gray-600 font-semibold">로그인 후 북마크를 이용할 수 있습니다</p>
+        ) : (
+          <>
+            <div className="flex justify-center mb-1">
+              <div className="relative w-96">
+                {/* 🔍 검색 아이콘 (왼쪽) */}
+                <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"/>
+                
+                <input
+                  type="text"
+                  placeholder="북마크 명을 입력하세요."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="
+                    w-full pl-10 pr-4 py-2
+                    bg-gray-100 border border-gray-300
+                    focus:ring-2 focus:ring-gray-300
+                    rounded-full text-gray-700 outline-none transition-all
+                    shadow-sm focus:bg-white"
                 />
+              </div>
             </div>
-          ))}
-          {/* 추가 버튼 */}
-          <button onClick={handleAddClick} className="flex flex-col items-center w-20 p-2 rounded-lg transition hover:bg-gray-200">
-            <div className="w-14 h-14 bg-[#9EEFFF] rounded-full flex items-center justify-center text-2xl">
-              <Plus size={24} className="text-gray-700" />
-            </div>
-            <span className="mt-2 text-sm text-center">추가</span>
-          </button>
-        </div>
 
-        <div className="flex items-center justify-center mt-3 space-x-3">
-          {currentPage > 0 && (
-            <Button onClick={() => handlePageChange(-1)} 
-              className="bg-gray-300 hover:bg-gray-400 text-gray-700 flex items-center px-3 py-2 rounded-full transition">
-              <ChevronLeft size={20} />
-            </Button>
-          )}
-          <span className="text-lg font-semibold text-gray-600 px-4">
-            {currentPage + 1} / {Math.max(1, Math.ceil(filteredBookmarks.length / itemsPerPage))}
-          </span>
-          {(currentPage + 1) * itemsPerPage < filteredBookmarks.length && (
-            <Button onClick={() => handlePageChange(1)} 
-              className="bg-gray-300 hover:bg-gray-400 text-gray-700 flex items-center px-3 py-2 rounded-full transition">
-              <ChevronRight size={20} />
-            </Button>
-          )}
-        </div>
+            <div className="flex justify-center gap-4 flex-wrap">
+              {displayedBookmarks.map((bookmark, index) => (
+                <div key={index} 
+                  className="relative flex flex-col items-center w-20 p-2 rounded-lg transition hover:bg-gray-200 group">
+                  <a href={bookmark.url} target="_blank" 
+                    rel="noopener noreferrer" className="flex flex-col items-center w-full">
+                    <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
+                      <img src={faviconURL(bookmark.url)} className="w-8 h-8 object-contain" alt={bookmark.name} />
+                    </div>
+                    <span className="mt-2 text-sm text-center truncate w-full">{bookmark.name}</span>
+                  </a>
+                  <MoreVertical size={20} 
+                    onClick={() => handleEditClick(bookmark.id)}
+                    className="
+                        absolute top-1 right-0 text-gray-500 hidden group-hover:flex 
+                        items-center justify-center rounded-full cursor-pointer
+                        bg-transparent hover:bg-gray-400/50 transition-colors
+                      " 
+                    />
+                </div>
+              ))}
+              {/* 추가 버튼 */}
+              <button onClick={handleAddClick} className="flex flex-col items-center w-20 p-2 rounded-lg transition hover:bg-gray-200">
+                <div className="w-14 h-14 bg-[#9EEFFF] rounded-full flex items-center justify-center text-2xl">
+                  <Plus size={24} className="text-gray-700" />
+                </div>
+                <span className="mt-2 text-sm text-center">추가</span>
+              </button>
+            </div>
+          </>
+        )}
+
+        {auth.isAuthenticated && 
+          <div className="flex items-center justify-center mt-3 space-x-3">
+            {currentPage > 0 && (
+              <Button onClick={() => handlePageChange(-1)} 
+                className="bg-gray-300 hover:bg-gray-400 text-gray-700 flex items-center px-3 py-2 rounded-full transition">
+                <ChevronLeft size={20} />
+              </Button>
+            )}
+            <span className="text-lg font-semibold text-gray-600 px-4">
+              {currentPage + 1} / {Math.max(1, Math.ceil(filteredBookmarks.length / itemsPerPage))}
+            </span>
+            {(currentPage + 1) * itemsPerPage < filteredBookmarks.length && (
+              <Button onClick={() => handlePageChange(1)} 
+                className="bg-gray-300 hover:bg-gray-400 text-gray-700 flex items-center px-3 py-2 rounded-full transition">
+                <ChevronRight size={20} />
+              </Button>
+            )}
+          </div>
+        }
       </div>
 
       {/* 북마크 추가 모달 */}

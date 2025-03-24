@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import RGL, { WidthProvider } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import Widget from "@/components/Widget";
 import Bookmark from "@/components/Bookmark";
 import MeetingRoomCalendar from "@/components/MeetingRoomCalendar";
 import TopSite from "@/components/TopSite";
@@ -10,13 +9,11 @@ import ChatGPT from "@/components/ChatGPTSearch";
 import LunchMenu from "@/components/LunchMenu";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
 
 const ReactGridLayout = WidthProvider(RGL);
 const STORAGE_KEY = "dashboard_layout";
 
 const widgets = [
-  { component: "Widget", content: (props) => <Widget {...props} /> },
   { component: "Bookmark", content: (props) => <Bookmark {...props} /> },
   { component: "MeetingRoomCalendar", content: (props) => <MeetingRoomCalendar {...props} /> },
   { component: "TopSite", content: (props) => <TopSite {...props} /> },

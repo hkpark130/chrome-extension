@@ -10,6 +10,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'), // ✅ @/를 src 폴더로 매핑
     },
   },
+  optimizeDeps: {
+    include: ['lucide-react'],
+  },
   server: {
     host: true,
   },
@@ -21,7 +24,10 @@ export default defineConfig({
       },
       output: {
         dir: 'dist',
-        entryFileNames: "assets/[name].js"
+        entryFileNames: "assets/[name].js",
+        manualChunks: {
+          "lucide-react": ["lucide-react"],
+        },
       },
     },
   },

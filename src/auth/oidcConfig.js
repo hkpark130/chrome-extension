@@ -13,8 +13,7 @@ export const userManager = new UserManager({
   userStore: new WebStorageStateStore({ store: window.sessionStorage }),
   monitorSession: true,
   automaticSilentRenew: true,
-  silent_redirect_uri: `${window.location.origin}/silent-redirect.html`,
 });
 
-Log.setLogger(console);
-Log.setLevel(Log.DEBUG);
+// Log.setLogger(console);
+// Log.setLevel(Log.DEBUG);

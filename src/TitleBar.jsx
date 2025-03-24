@@ -4,10 +4,7 @@ import userIcon from "@/assets/user-icon.png";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogOut, LogIn, Settings } from "lucide-react";
-import { test } from "@/api/api.js";
-import { useAuth } from "react-oidc-context";
-import { userManager } from "@/auth/oidcConfig"; // 직접 불러온 UserManager
-
+import { useAuth, hasAuthParams } from "react-oidc-context";
 
 const TitleBar = () => {
   const auth = useAuth();
@@ -15,27 +12,29 @@ const TitleBar = () => {
   const initalialAccessToken = auth.user?.access_token ?? '';
   const [accessToken, setAccessToken] = useState(initalialAccessToken);
   const accessTokenRef = useRef(initalialAccessToken);
+  const [hasTriedSignin, setHasTriedSignin] = useState(false);
 
   useEffect(() => {
-    const newToken = auth.user?.access_token ?? '';
+    const newToken = auth.user?.access_token ?? "";
     if (accessTokenRef.current !== newToken) {
       setAccessToken(newToken);
       accessTokenRef.current = newToken;
-
-      console.debug('Renewed access token: ' + auth.user?.access_token);
     }
   }, [auth.user?.access_token]);
 
-//   https://www.npmjs.com/package/react-oidc-context
-//   useEffect(() => {
-//     if (!hasAuthParams() &&
-//         !auth.isAuthenticated && !auth.activeNavigator && !auth.isLoading &&
-//         !hasTriedSignin
-//     ) {
-//         auth.signinRedirect();
-//         setHasTriedSignin(true);
-//     }
-// }, [auth, hasTriedSignin]);
+  useEffect(() => {
+    if (
+      !hasAuthParams() && // OIDC 인증 파라미터가 없고
+      !auth.isAuthenticated && // 인증되지 않은 상태
+      !auth.activeNavigator && // 현재 로그인 시도 중이 아니라면
+      !auth.isLoading && // 로딩 중이 아니고
+      !hasTriedSignin // 아직 Silent Authentication 시도 안 했을 때
+    ) {
+      auth.signinSilent()
+        .then(() => console.log("✅ Silent 로그인 성공!"));
+      setHasTriedSignin(true);
+    }
+  }, [auth, hasTriedSignin]);
 
   const handleAuthAction = () => {
     if (auth.isAuthenticated) {
@@ -45,14 +44,14 @@ const TitleBar = () => {
     }
   };
 
-  const handleTest = async () => {
-    try {
-      const res = await test(auth.user?.access_token); // 토큰 전달 시 참고
-      console.log("res: ", res);
-    } catch (err) {
-      console.error("API 호출 에러: ", err);
-    }
-  };
+  // const handleTest = async () => {
+  //   try {
+  //     const res = await test(auth.user?.access_token); // 토큰 전달 시 참고
+  //     console.log("res: ", res);
+  //   } catch (err) {
+  //     console.error("API 호출 에러: ", err);
+  //   }
+  // };
 
   return (
     <header className="w-full flex justify-between items-center px-6 py-1 bg-white border-b shadow-sm">
@@ -95,13 +94,15 @@ const TitleBar = () => {
 
       {/* 빈 영역 */}
       <div className="flex flex-col w-12">
-        <Button onClick={() => navigate("/edit")} 
-          style={{ fontFamily: "'Gamja Flower', sans-serif", fontSize: "1.27rem" }}
-          className="absolute top-2 right-2 border-[2px] border-cyan-500 text-cyan-600 py-2 px-4 rounded-full shadow-md 
-                bg-white hover:bg-cyan-50 transition">
-          <Settings className="w-4 h-4" />
-          편집
-        </Button>
+        <div className="flex flex-col items-center">
+          <Button onClick={() => navigate("/edit")} 
+            style={{ fontFamily: "'Gamja Flower', sans-serif", fontSize: "1.27rem" }}
+            className="border-[2px] border-cyan-500 text-cyan-600 py-2 px-4 rounded-full shadow-md 
+                  bg-white hover:bg-cyan-50 transition">
+            <Settings className="w-4 h-4" />
+            편집
+          </Button>
+        </div>
       </div>
     </header>
   );

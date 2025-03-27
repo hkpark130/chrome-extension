@@ -1,7 +1,7 @@
 import axios from "axios";
 import OpenAI from "openai";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://192.168.2.72:8000";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://192.168.2.44:8000";
 
 // ✅ Axios 인스턴스 생성
 const axiosInstance = axios.create({
@@ -47,6 +47,59 @@ export const fetchOpenAIResponse = async (query) => {
         console.error("🚨 OpenAI 요청 오류: ", err);
         return { error: err.message };
     }
+};
+
+export const getDashboard = async (accessToken, userId) => {
+  if (!userId) {
+    console.error("오류: userId가 없습니다.");
+    throw new Error("userId가 제공되지 않았습니다.");
+  }
+
+  try {
+    const response = await axiosInstance.get("/dashboard/"+userId, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("실패: ", error);
+    throw error;
+  }
+};
+
+const saveToDatabase = async (updatedItems, updatedLayout) => {
+  const dashboardData = {
+    userId: "550e8400-e29b-41d4-a716-446655440000", // 실제 로그인된 사용자의 UUID 필요
+    widgets: updatedLayout.map(item => ({
+      position: {
+        x: item.x,
+        y: item.y,
+        width: item.w,
+        height: item.h,
+      },
+      style: {
+        isBordered: item.isBordered,
+        component: item.component
+      }
+    }))
+  };
+
+  try {
+    const response = await fetch("/api/dashboards", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(dashboardData)
+    });
+
+    if (response.ok) {
+      alert("✅ 대시보드가 저장되었습니다!");
+    } else {
+      throw new Error("Failed to save");
+    }
+  } catch (error) {
+    console.error("Error saving dashboard:", error);
+  }
 };
 
 // ✅ 🔹 북마크 테스트 API 요청

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './item.css';
 import { isChromeExtension } from "@/api/utils";
-import axiosInstance, { setAccessToken } from "@/api/api";
+import axiosInstance from "@/api/api";
 import Modal from './Modal';
 import { Button } from "@/components/ui/button";
 import { MoreVertical, Plus, ChevronLeft, ChevronRight, Search } from "lucide-react";
@@ -22,7 +22,6 @@ const Bookmark = ({ isEditing, isBordered }) => {
 
   useEffect(() => {
     if (auth.isAuthenticated) {  // 🔹 로그인된 경우만 북마크 가져오기
-      setAccessToken(auth.user?.access_token);
       fetchBookmarks();
     }
   }, [auth.isAuthenticated]);
@@ -228,7 +227,7 @@ const Bookmark = ({ isEditing, isBordered }) => {
         )}
 
         {auth.isAuthenticated && 
-          <div className="flex items-center justify-center mt-3 space-x-3">
+          <div className="flex items-center justify-center mt-2 space-x-3">
             {currentPage > 0 && (
               <Button onClick={() => handlePageChange(-1)} 
                 className="bg-gray-300 hover:bg-gray-400 text-gray-700 flex items-center px-3 py-2 rounded-full transition">

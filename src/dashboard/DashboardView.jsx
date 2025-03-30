@@ -9,6 +9,8 @@ import ChatGPT from "@/components/ChatGPTSearch";
 import LunchMenu from "@/components/LunchMenu";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { loadDashboard } from "@/api/api.js";
+import { useAuth } from "react-oidc-context";
 
 const ReactGridLayout = WidthProvider(RGL);
 const STORAGE_KEY = "dashboard_layout";
@@ -24,6 +26,17 @@ const widgets = [
 const DashboardView = () => {
   const [layout, setLayout] = useState([]);
   const navigate = useNavigate();
+  const auth = useAuth();
+
+  useEffect(() => {
+    const fetchLayout = async () => {
+      if (auth.isAuthenticated) {
+        const layoutFromDB = await loadDashboard(auth.user?.profile?.sub);
+        setLayout(layoutFromDB);
+      }
+    };
+    fetchLayout();
+  }, [auth.isAuthenticated]);
 
   useEffect(() => {
     const savedLayout = localStorage.getItem(STORAGE_KEY);

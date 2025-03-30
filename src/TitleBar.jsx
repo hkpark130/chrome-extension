@@ -5,19 +5,19 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogOut, LogIn, Settings } from "lucide-react";
 import { useAuth, hasAuthParams } from "react-oidc-context";
+import { setApiAccessToken } from "@/api/api.js";
 
 const TitleBar = () => {
   const auth = useAuth();
   const navigate = useNavigate();
   const initalialAccessToken = auth.user?.access_token ?? '';
-  const [accessToken, setAccessToken] = useState(initalialAccessToken);
   const accessTokenRef = useRef(initalialAccessToken);
   const [hasTriedSignin, setHasTriedSignin] = useState(false);
 
   useEffect(() => {
     const newToken = auth.user?.access_token ?? "";
     if (accessTokenRef.current !== newToken) {
-      setAccessToken(newToken);
+      setApiAccessToken(newToken);
       accessTokenRef.current = newToken;
     }
   }, [auth.user?.access_token]);
@@ -43,15 +43,6 @@ const TitleBar = () => {
       auth.signinRedirect();
     }
   };
-
-  // const handleTest = async () => {
-  //   try {
-  //     const res = await test(auth.user?.access_token); // 토큰 전달 시 참고
-  //     console.log("res: ", res);
-  //   } catch (err) {
-  //     console.error("API 호출 에러: ", err);
-  //   }
-  // };
 
   return (
     <header className="w-full flex justify-between items-center px-6 py-1 bg-white border-b shadow-sm">

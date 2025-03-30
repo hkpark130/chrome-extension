@@ -9,89 +9,88 @@ import ChatGPT from "@/components/ChatGPTSearch";
 import LunchMenu from "@/components/LunchMenu";
 import MeetingRoomCalendar from "@/components/MeetingRoomCalendar";
 import { XCircle, Save, PencilRuler, CheckSquare, Square } from 'lucide-react';
+import { v4 as uuidv4 } from "uuid";
+import { saveDashboard, loadDashboard } from "@/api/api.js";
+import { useAuth } from "react-oidc-context";
 
 const ReactGridLayout = WidthProvider(RGL);
 const STORAGE_KEY = "dashboard_layout";
 
 const widgets = [
-  { component: "TopSite", label: "🔖 자주 방문하는 사이트", w: 7, h: 4, isBordered: true,
-    content: (props) => <TopSite isEditing={true} isBordered={props.isBordered} /> },
-  { component: "Bookmark", label: "🔖 북마크", w: 7, h: 4, isBordered: true,
-    content: (props) => <Bookmark isEditing={true} isBordered={props.isBordered} /> },
-  { component: "ChatGPT", label: "🤖 ChatGPT", w: 6, h: 3, isBordered: true,
-    content: (props) => <ChatGPT isEditing={true} isBordered={props.isBordered} /> },
-  { component: "MeetingRoomCalendar", label: "📅 회의실 예약", w: 7, h: 9, isBordered: true,
-    content: (props) => <MeetingRoomCalendar isEditing={true} isBordered={props.isBordered} /> },
-  { component: "LunchMenu", label: "🍱 점심추천", w: 2, h: 3, isBordered: true,
-    content: (props) => <LunchMenu isEditing={true} isBordered={props.isBordered} /> },
+  { component: "TopSite", label: "🔖 자주 방문하는 사이트", w: 7, h: 4, isBordered: true, content: (props) => <TopSite isEditing={true} isBordered={props.isBordered} /> },
+  { component: "Bookmark", label: "🔖 북마크", w: 7, h: 4, isBordered: true, content: (props) => <Bookmark isEditing={true} isBordered={props.isBordered} /> },
+  { component: "ChatGPT", label: "🤖 ChatGPT", w: 6, h: 3, isBordered: true, content: (props) => <ChatGPT isEditing={true} isBordered={props.isBordered} /> },
+  { component: "MeetingRoomCalendar", label: "🗓️ 회의실 예약", w: 7, h: 9, isBordered: true, content: (props) => <MeetingRoomCalendar isEditing={true} isBordered={props.isBordered} /> },
+  { component: "LunchMenu", label: "🍱 점심추천", w: 2, h: 3, isBordered: true, content: (props) => <LunchMenu isEditing={true} isBordered={props.isBordered} /> },
 ];
 
 const DashboardEditor = () => {
+  const auth = useAuth();
   const navigate = useNavigate();
-  const [items, setItems] = useState([]);
   const [layout, setLayout] = useState([]);
-  const [counter, setCounter] = useState(0);
   const [draggingWidget, setDraggingWidget] = useState(null);
+  const userId = auth.user?.profile?.sub;
 
   useEffect(() => {
     const savedLayout = localStorage.getItem(STORAGE_KEY);
     if (savedLayout) {
-      const parsedLayout = JSON.parse(savedLayout);
-      setItems(parsedLayout.items);
-      setLayout(parsedLayout.layout);
-      setCounter(parsedLayout.counter || 0); // 카운터도 함께 복원
+      const parsed = JSON.parse(savedLayout);
+      setLayout(parsed.layout || []);
     }
   }, []);
 
-  const saveToLocalStorage = (updatedItems, updatedLayout) => {
-    const newLayout = JSON.parse(JSON.stringify(updatedLayout));
-    updatedItems.forEach(item => {
-        const existingLayoutItem = newLayout.find(layoutItem => layoutItem.i === item.i);
-        if (existingLayoutItem) {
-            existingLayoutItem.component = item.component;
-            existingLayoutItem.isBordered = item.isBordered;
-        } 
-    });
-    const savedData = {
-      items: updatedItems,
-      layout: newLayout,
-      counter: counter
+  useEffect(() => {
+    if (!auth.isLoading && !auth.isAuthenticated) {
+      auth.signinRedirect(); // 로그인 페이지로 이동
+    }
+
+    const fetchLayout = async () => {
+      if (!auth.isLoading && auth.isAuthenticated) {
+        const layoutFromDB = await loadDashboard(userId);
+        setLayout(layoutFromDB);
+      }
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(savedData));
-    alert("✅ 저장 완료!");
-    navigate("/");
+  
+    fetchLayout();
+  }, [auth.isLoading, auth.isAuthenticated]);
+
+  if (auth.isLoading) {
+    return <div>🔒 로그인 상태 확인 중...</div>;
+  }
+
+  if (!auth.isAuthenticated) {
+    return null;
+  }
+
+  const handleSave = async (layout) => {
+    try {
+      await saveDashboard(userId, layout);
+      alert("✅ 저장 완료!");
+      navigate("/");
+    } catch (e) {
+      console.error("❌ 저장 실패: ", e);
+      alert("❌ 저장 실패");
+    }
   };
 
   const removeItem = (id) => {
-    const updatedItems = items.filter(item => item.i !== id);
-    const updatedLayout = layout.filter(item => item.i !== id);
-
-    setItems(updatedItems);
-    setLayout(updatedLayout);
+    setLayout(prev => prev.filter(item => item.i !== id));
   };
 
-  const borderedItem = (id) => {
-    const updatedItems = items.map(item => 
-      item.i === id ? { ...item, isBordered: !item.isBordered } : item
-    );
-    const updatedLayout = layout.map(item => 
-      item.i === id ? { ...item, isBordered: !item.isBordered } : item
-    );
-
-    setItems(updatedItems);
-    setLayout(updatedLayout);
+  const toggleBorder = (id) => {
+    setLayout(prev => prev.map(item => item.i === id ? { ...item, isBordered: !item.isBordered } : item));
   };
 
   const onDrop = (layout, layoutItem, event) => {
     event.preventDefault();
     const widgetData = event.dataTransfer.getData("application/json");
     if (!widgetData) return;
-  
+
     try {
       const parsedWidget = JSON.parse(widgetData);
 
       const newItem = {
-        i: counter.toString(),
+        i: uuidv4(),
         x: layoutItem.x,
         y: layoutItem.y,
         w: parsedWidget.w,
@@ -99,25 +98,26 @@ const DashboardEditor = () => {
         minW: 1,
         minH: 2,
         resizeHandles: ["s", "w", "e", "n", "sw", "nw", "se", "ne"],
-        component: parsedWidget.component, // 🔹 위젯 정보 직접 추가
+        component: parsedWidget.component,
         isBordered: parsedWidget.isBordered,
       };
 
-      setItems(prev => [...prev, newItem]);
-      setLayout(prev => [...prev, newItem]); // Layout도 함께 업데이트
-      setCounter(prev => prev + 1);
+      setLayout(prev => [...prev, newItem]);
       setDraggingWidget(null);
     } catch (error) {
       console.error("Failed to parse widget data:", error);
     }
   };
 
-  const onDragOver = (e) => {
-    e.preventDefault();
-  };
+  const onDragOver = (e) => e.preventDefault();
 
-  const onLayoutChange = (newLayout) => {
-    setLayout(newLayout);
+  const onLayoutChange = (newLayout) => { // 커스텀 값 추가를 위해
+    setLayout(prev =>
+      newLayout.map(nl => {
+        const existing = prev.find(p => p.i === nl.i);
+        return existing ? { ...existing, ...nl } : nl;
+      })
+    );
   };
 
   const onDragStart = (widget) => (e) => {
@@ -127,26 +127,22 @@ const DashboardEditor = () => {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* 툴박스 영역 */}
       <div className="w-64 bg-white shadow-lg border-r p-4">
         <div className="flex justify-between items-center mb-1">
-          <div className="flex items-center font-semibold" style={{ fontFamily: "'Gamja Flower', sans-serif", fontSize: "1.3rem"}}>
-            <PencilRuler /> 
-            툴박스
+          <div className="flex items-center font-semibold" style={{ fontFamily: "'Gamja Flower', sans-serif", fontSize: "1.3rem" }}>
+            <PencilRuler /> 툴박스
           </div>
           <button
-            onClick={() => {saveToLocalStorage(items, layout)}}
+            onClick={() => handleSave(layout)}
             className="px-3 py-2 bg-green-500 text-white border-[2px] border-green-500 shadow-md hover:bg-green-600 transition flex items-center gap-2 rounded-full"
           >
             <Save className="w-5 h-5" />
-            <span className="text-sm font-medium" style={{ fontFamily: "'Gamja Flower', sans-serif", fontSize: "1.1rem"}}>저장</span>
+            <span className="text-sm font-medium" style={{ fontFamily: "'Gamja Flower', sans-serif", fontSize: "1.1rem" }}>저장</span>
           </button>
         </div>
-        <div>
-          <p className="text-sm text-gray-500 text-center mb-1">
-            위젯을 드래그&드랍 해주세요.
-          </p>
-        </div>
+        <p className="text-sm text-gray-500 text-center mb-1">
+          위젯을 드래그&드랍 해주세요.
+        </p>
         {widgets.map((widget) => (
           <div
             key={widget.component}
@@ -159,7 +155,6 @@ const DashboardEditor = () => {
         ))}
       </div>
 
-      {/* 📌 대시보드 영역 */}
       <div className="flex-grow p-1">
         <ReactGridLayout
           draggableCancel=".cancelSelectorName"
@@ -178,30 +173,22 @@ const DashboardEditor = () => {
           useCSSTransforms={true}
           droppingItem={draggingWidget ? { i: "__dropping-elem__", w: draggingWidget.w, h: draggingWidget.h } : { i: "__dropping-elem__", w: 2, h: 2 }}
         >
-          {items.map((item) => {
-            const widgetData = widgets.find((widget) => widget.component === item.component);
+          {layout.map((item) => {
+            if (item.i === "__dropping-elem__") return null;
+            const widgetData = widgets.find(widget => widget.component === item.component);
             return (
-              <div key={item.i} data-grid={layout.find(l => l.i === item.i)}
-                style={item.isBordered ? {
-                  border: '1px solid #ccc',
-                  background: '#eee',
-                }: {}}
+              <div
+                key={item.i}
+                data-grid={item}
+                style={item.isBordered ? { border: '1px solid #ccc', background: '#eee' } : {}}
               >
                 <XCircle
-                  onClick={() => {
-                    removeItem(item.i);
-                  }}
-                  className="cancelSelectorName absolute flex items-center justify-center top-1 left-1 
-                  text-red-500  rounded-full w-5 h-5 
-                  cursor-pointer leading-5 z-10"
-                >
-                </XCircle>
-
-                <div 
-                  onClick={() => {
-                    borderedItem(item.i);
-                  }}
-                  className="cancelSelectorName absolute top-1 left-6 flex items-center justify-center cursor-pointer z-10"
+                  onClick={() => removeItem(item.i)}
+                  className="cancelSelectorName absolute top-1 left-1 text-red-500 w-5 h-5 cursor-pointer z-10"
+                />
+                <div
+                  onClick={() => toggleBorder(item.i)}
+                  className="cancelSelectorName absolute top-1 left-6 cursor-pointer z-10"
                 >
                   {item.isBordered ? (
                     <CheckSquare className="text-green-500 w-5 h-5" />
@@ -209,7 +196,6 @@ const DashboardEditor = () => {
                     <Square className="text-gray-500 w-5 h-5" />
                   )}
                 </div>
-
                 {widgetData ? widgetData.content({ isBordered: item.isBordered }) : "Unknown Widget"}
               </div>
             );

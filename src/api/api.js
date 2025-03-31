@@ -123,3 +123,13 @@ export const deleteMeeting = async (url) => {
     console.error("Failed to delete events:", error);
   }
 };
+
+export const saveMeeting = async (meetingRequest) => {
+  try {
+    const response = await axiosInstance.post(`/workspace/meeting`, meetingRequest);
+    return response.data; // 저장된 예약 리스트 반환 (반복 포함 가능)
+  } catch (error) {
+    console.error("❌ 회의 예약 저장 실패:", error);
+    throw error; // 상위에서 try-catch 할 수 있도록 re-throw
+  }
+};

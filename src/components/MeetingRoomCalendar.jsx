@@ -5,7 +5,7 @@ import 'moment/locale/ko';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import Modal from './Modal';
 import { Button } from "@/components/ui/button";
-import { loadMeeting, deleteMeeting } from "@/api/api.js";
+import { loadMeeting, deleteMeeting, saveMeeting } from "@/api/api.js";
 
 // moment를 사용하여 localizer 설정
 moment.locale('ko');
@@ -27,7 +27,6 @@ const messages = {
 };
 
 function MeetingRoomCalendar({ isEditing, isBordered }) {
-  const [counter, setCounter] = useState(0);
   const [view, setView] = useState("month");
   const [events, setEvents] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -73,8 +72,13 @@ function MeetingRoomCalendar({ isEditing, isBordered }) {
     return {};
   };
 
+  const fetchData = async () => {
+    const data = await loadMeeting();
+    setEvents(data);
+  };
+
   useEffect(() => {
-    loadMeeting();
+    fetchData();
   }, []);
 
   const handleAlertClose = () => {
@@ -94,7 +98,7 @@ function MeetingRoomCalendar({ isEditing, isBordered }) {
       } else {
         await deleteMeeting(`${selectedEvent.id}`);
       }
-      loadMeeting();
+      fetchData();
     } catch (error) {
       console.error("Failed to delete event:", error);
     }
@@ -166,8 +170,8 @@ function MeetingRoomCalendar({ isEditing, isBordered }) {
     };
   
     try {
-      await axios.post(API_BASE_URL, meetingRequest);
-      loadMeeting();
+      await saveMeeting(meetingRequest);
+      fetchData();
       setShowModal(false);
     } catch (error) {
       console.error("Failed to save meeting:", error);

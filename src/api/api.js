@@ -101,3 +101,25 @@ export const loadDashboard = async (userId) => {
     return [];
   }
 };
+
+export const loadMeeting = async () => {
+  try {
+    const response = await axiosInstance.get(`/workspace/meeting`);
+    return response.data.map(event => ({
+      ...event,
+      start: new Date(event.start),
+      end: new Date(event.end),
+    }));
+  } catch (error) {
+    console.error("Failed to fetch events:", error);
+  }
+};
+
+export const deleteMeeting = async (url) => {
+  try {
+    const response = await axiosInstance.delete(`/workspace/meeting/${url}`);
+    return response.data.data;
+  } catch (error) {
+    console.error("Failed to delete events:", error);
+  }
+};

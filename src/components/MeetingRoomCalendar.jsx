@@ -5,8 +5,7 @@ import 'moment/locale/ko';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import Modal from './Modal';
 import { Button } from "@/components/ui/button";
-
-const STORAGE_KEY = "meetingEvents";
+import { loadMeeting, deleteMeeting } from "@/api/api.js";
 
 // moment를 사용하여 localizer 설정
 moment.locale('ko');
@@ -75,42 +74,31 @@ function MeetingRoomCalendar({ isEditing, isBordered }) {
   };
 
   useEffect(() => {
-    const savedEvents = localStorage.getItem(STORAGE_KEY);
-    if (savedEvents) {
-      const parsedEvents = JSON.parse(savedEvents).map(event => ({
-        ...event,
-        start: new Date(event.start),
-        end: new Date(event.end),
-      }));
-      setEvents(parsedEvents); 
-    }
+    loadMeeting();
   }, []);
-
-  // ⭐ `localStorage`에 이벤트 저장 (예약할 때 + 삭제할 때 자동 반영)
-  const saveEventsToLocalStorage = (updatedEvents) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedEvents));
-  };
 
   const handleAlertClose = () => {
     setSelectedEvent(null);
     setShowAlert(false);
   };
 
-  const handleDeleteEvent = (deleteAll = false) => {
+  const handleDeleteEvent = async (deleteAll = false) => {
     if (!selectedEvent) return;
 
     const isConfirmed = window.confirm("정말 삭제하시겠습니까?");
     if (!isConfirmed) return;
   
-    let updatedEvents;
-    if (deleteAll && selectedEvent.groupId) {
-      updatedEvents = events.filter(event => event.groupId !== selectedEvent.groupId);
-    } else {
-      updatedEvents = events.filter(event => event.id !== selectedEvent.id);
+    try {
+      if (deleteAll && selectedEvent.groupId) {
+        await deleteMeeting(`group/${selectedEvent.groupId}`);
+      } else {
+        await deleteMeeting(`${selectedEvent.id}`);
+      }
+      loadMeeting();
+    } catch (error) {
+      console.error("Failed to delete event:", error);
     }
   
-    setEvents(updatedEvents);
-    saveEventsToLocalStorage(updatedEvents);
     setShowAlert(false);
     setSelectedEvent(null);
   };
@@ -152,7 +140,7 @@ function MeetingRoomCalendar({ isEditing, isBordered }) {
     setNewMeeting((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSaveMeeting = () => {
+  const handleSaveMeeting = async () => {
     if (!newMeeting.title || !newMeeting.startTime || !newMeeting.endTime) {
       setAlertMessage('모든 필드를 입력해주세요.');
       setShowAlert(true);
@@ -169,37 +157,21 @@ function MeetingRoomCalendar({ isEditing, isBordered }) {
       return;
     }
   
-    const newGroupId = `${Date.now()}-${Math.random()}`; // 고유한 그룹 ID 생성
+    const meetingRequest = {
+      title: newMeeting.title,
+      start: startDateTime,
+      end: endDateTime,
+      recurring: newMeeting.isRecurring,
+      repeatWeeks: newMeeting.repeatWeeks,
+    };
   
-    let newEvents = [
-      {
-        id: counter.toString(),
-        title: newMeeting.title,
-        start: startDateTime,
-        end: endDateTime,
-        groupId: newMeeting.isRecurring ? newGroupId : null, // 반복 일정이면 그룹 ID 추가
-      }
-    ];
-  
-    // 반복 예약 처리
-    if (newMeeting.isRecurring) {
-      for (let i = 1; i < newMeeting.repeatWeeks; i++) {
-        newEvents.push({
-          id: (counter + i).toString(),
-          title: newMeeting.title,
-          start: moment(startDateTime).add(i, 'weeks').toDate(),
-          end: moment(endDateTime).add(i, 'weeks').toDate(),
-          groupId: newGroupId, // 동일한 그룹 ID 부여
-        });
-      }
-      setCounter((prev) => prev + newMeeting.repeatWeeks - 1);
+    try {
+      await axios.post(API_BASE_URL, meetingRequest);
+      loadMeeting();
+      setShowModal(false);
+    } catch (error) {
+      console.error("Failed to save meeting:", error);
     }
-  
-    const updatedEvents = [...events, ...newEvents];
-    setEvents(updatedEvents);
-    saveEventsToLocalStorage(updatedEvents);
-    setCounter((prev) => prev + 1);
-    setShowModal(false);
   };
 
   // 이미 등록된 이벤트(예약)를 클릭했을 때

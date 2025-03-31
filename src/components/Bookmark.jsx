@@ -35,7 +35,7 @@ const Bookmark = ({ isEditing, isBordered }) => {
   
   const fetchBookmarks = async () => {
     try {
-      const res = await axiosInstance.get(`/bookmarks/${userId}`);
+      const res = await axiosInstance.get(`/workspace/bookmark/${userId}`);
       setBookmarks(res.data.data);
     } catch (error) {
       console.error("✅ 북마크 불러오기 실패: ", error);
@@ -76,7 +76,7 @@ const Bookmark = ({ isEditing, isBordered }) => {
         };
   
         // 🔹 백엔드 API 호출 (북마크 수정 요청)
-        const res = await axiosInstance.put(`/bookmarks/${userId}/${editedBookmark.id}`, updatedBookmark);
+        const res = await axiosInstance.put(`/workspace/bookmark/${userId}/${editedBookmark.id}`, updatedBookmark);
   
         // 🔹 북마크 배열 업데이트
         setBookmarks((prev) =>
@@ -100,7 +100,7 @@ const Bookmark = ({ isEditing, isBordered }) => {
   
     try {
       // ✅ 백엔드 DELETE 요청
-      await axiosInstance.delete(`/bookmarks/${userId}/${editedBookmark.id}`);
+      await axiosInstance.delete(`/workspace/bookmark/${userId}/${editedBookmark.id}`);
   
       // ✅ UI에서 삭제된 북마크 반영
       setBookmarks((prev) => prev.filter((bookmark) => bookmark.id !== editedBookmark.id));
@@ -126,7 +126,7 @@ const Bookmark = ({ isEditing, isBordered }) => {
     if (newBookmark.name && newBookmark.url) {
       try {
         const normalizedUrl = normalizeURL(newBookmark.url);
-        const res = await axiosInstance.post("/bookmarks", {
+        const res = await axiosInstance.post("/workspace/bookmark", {
           userId,
           name: newBookmark.name,
           url: normalizedUrl,

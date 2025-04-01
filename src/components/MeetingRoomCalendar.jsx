@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import 'moment/locale/ko';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import Modal from './Modal';
 import { Button } from "@/components/ui/button";
 import { loadMeeting, deleteMeeting, saveMeeting } from "@/api/api.js";
+import { useAuth } from "react-oidc-context";
 
 // moment를 사용하여 localizer 설정
 moment.locale('ko');
@@ -27,6 +28,7 @@ const messages = {
 };
 
 function MeetingRoomCalendar({ isEditing, isBordered }) {
+  const auth = useAuth();
   const [view, setView] = useState("month");
   const [events, setEvents] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -38,6 +40,8 @@ function MeetingRoomCalendar({ isEditing, isBordered }) {
     isRecurring: false,
     repeatWeeks: 4,
     baseDate: null,
+    createdBy: '',
+    createdByName: auth.user?.profile?.name,
   });
   const [alertMessage, setAlertMessage] = useState('');
   const [showAlert, setShowAlert] = useState(false);
@@ -116,6 +120,8 @@ function MeetingRoomCalendar({ isEditing, isBordered }) {
       isRecurring: false,
       repeatWeeks: 4,
       baseDate: start,
+      createdBy: auth.user?.profile?.sub,
+      createdByName: auth.user?.profile?.name,
     });
     setShowModal(true);
   };
@@ -152,8 +158,8 @@ function MeetingRoomCalendar({ isEditing, isBordered }) {
     }
   
     const baseDate = moment(newMeeting.baseDate);
-    const startDateTime = moment(`${baseDate.format('YYYY-MM-DD')} ${newMeeting.startTime}`, "YYYY-MM-DD HH:mm").toDate();
-    const endDateTime = moment(`${baseDate.format('YYYY-MM-DD')} ${newMeeting.endTime}`, "YYYY-MM-DD HH:mm").toDate();
+    const startDateTime = moment.utc(`${baseDate.format('YYYY-MM-DD')} ${newMeeting.startTime}`, "YYYY-MM-DDTHH:mm:sszz").local();
+    const endDateTime = moment.utc(`${baseDate.format('YYYY-MM-DD')} ${newMeeting.endTime}`, "YYYY-MM-DDTHH:mm:sszz").local();
   
     if (isNaN(startDateTime) || isNaN(endDateTime) || endDateTime <= startDateTime) {
       setAlertMessage("올바른 날짜 및 시간을 입력해주세요.");
@@ -167,6 +173,7 @@ function MeetingRoomCalendar({ isEditing, isBordered }) {
       end: endDateTime,
       recurring: newMeeting.isRecurring,
       repeatWeeks: newMeeting.repeatWeeks,
+      createdBy: newMeeting.createdBy,
     };
   
     try {
@@ -183,8 +190,9 @@ function MeetingRoomCalendar({ isEditing, isBordered }) {
     setSelectedEvent(event);
     setAlertMessage(`예약 상세 정보:
 제목: ${event.title}
-시작: ${moment(event.start).format('HH:mm')}
-종료: ${moment(event.end).format('HH:mm')}`);
+시작: ${moment(event.start).tz('Asia/Seoul').format('HH:mm')}
+종료: ${moment(event.end).tz('Asia/Tokyo').format('HH:mm')}
+등록자: ${event.createdByName}`);
     setShowAlert(true);
   };
 
@@ -258,6 +266,10 @@ function MeetingRoomCalendar({ isEditing, isBordered }) {
           </div>
         </div>
 
+        <div className="mb-3 mt-3">
+          <p className="text-sm text-gray-700">등록자: {newMeeting.createdByName}</p>
+        </div>
+
         {/* 반복 예약 설정 */}
         <label className="flex items-center mb-3 pt-3">
           <input type="checkbox" name="isRecurring" checked={newMeeting.isRecurring} onChange={handleInputChange} className="mr-2" />
@@ -291,16 +303,19 @@ function MeetingRoomCalendar({ isEditing, isBordered }) {
 
         <input type="time" value={selectedTime} 
           onChange={(e) => setSelectedTime(e.target.value)}
-          onFocus={(e) => e.target.showPicker && e.target.showPicker()}
+          onMouseDown={(e) => { 
+            e.preventDefault();
+            e.target.showPicker();
+          }}
           className="border p-2 rounded w-full mb-4"/>
 
-        <div className="flex space-x-2 items-center">
-          <Button onClick={handleTimeSave} className="bg-blue-500 text-white py-2 px-4 rounded">
-            확인 
-          </Button>
+        <div className="flex justify-between items-center">
           <p className='text-sm'>
             자정(밤 12시)를 넘어갈 수 없습니다.
           </p>
+          <Button onClick={handleTimeSave} className="bg-blue-500 text-white py-2 px-4 rounded">
+            확인 
+          </Button>
         </div>
       </Modal>
 

@@ -126,6 +126,7 @@ export const deleteMeeting = async (url) => {
 
 export const saveMeeting = async (meetingRequest) => {
   try {
+    console.log("meetingRequest: ", meetingRequest);
     const response = await axiosInstance.post(`/workspace/meeting`, meetingRequest);
     return response.data; // 저장된 예약 리스트 반환 (반복 포함 가능)
   } catch (error) {

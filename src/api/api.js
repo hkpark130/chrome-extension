@@ -9,29 +9,15 @@ const axiosInstance = axios.create({
   withCredentials: true,
 });
 
-export const fetchAxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-  withCredentials: true,
-  adapter: 'fetch'
-});
-
-export const attachAuthInterceptor = (instance, getToken) => {
-  console.log(getToken);
-  instance.interceptors.request.use(
-    (config) => {
-      const token = getToken?.();
-      if (token) {
-        config.headers = config.headers || {};
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      return config;
-    },
-    (error) => Promise.reject(error)
-  );
-};
-
-attachAuthInterceptor(axiosInstance, () => accessToken);
-attachAuthInterceptor(fetchAxiosInstance, () => accessToken);
+axiosInstance.interceptors.request.use(
+  (config) => {
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 export const setApiAccessToken = (token) => {
   accessToken = token;
@@ -47,7 +33,7 @@ export const fetchOpenAIStream = async (query, onChunk) => {
   }
 
   try {
-    const response = await fetchAxiosInstance.post(
+    const response = await axiosInstance.post(
       "/external/ai",
       { message: query },
       {
@@ -58,28 +44,26 @@ export const fetchOpenAIStream = async (query, onChunk) => {
             Authorization: `Bearer ${accessToken}`,
           }),
         },
+        responseType: "stream", // axios fetch adapter를 위한 명시
+        adapter: "fetch", // fetch adapter 명시
       }
     );
 
-    // fetch adapter 사용 시 fetchResponse가 반환되므로 getReader 사용 가능
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder("utf-8");
-    let partial = "";
+    const stream = response.data;
+    // fetch 기반 response.data 는 ReadableStream임 → pipeThrough으로 디코딩
+    const reader = stream.pipeThrough(new TextDecoderStream()).getReader();
 
     while (true) {
-      const { done, value } = await reader.read();
+      const { value, done } = await reader.read();
       if (done) break;
 
-      partial += decoder.decode(value, { stream: true });
-
-      const lines = partial.split("\n");
-      partial = lines.pop(); // 남아있을 incomplete 라인 보존
+      const lines = value.split("\n");
 
       for (const line of lines) {
         if (line.startsWith("data:")) {
           const text = line.replace(/^data:\s?/, "").trim();
           if (text) {
-            onChunk(text); // 전달된 callback 호출
+            onChunk(text);
           }
         }
       }

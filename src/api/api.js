@@ -1,5 +1,4 @@
 import axios from "axios";
-import OpenAI from "openai";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://192.168.2.44:8000";
 
@@ -10,15 +9,29 @@ const axiosInstance = axios.create({
   withCredentials: true,
 });
 
-axiosInstance.interceptors.request.use(
-  (config) => {
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+export const fetchAxiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+  adapter: 'fetch'
+});
+
+export const attachAuthInterceptor = (instance, getToken) => {
+  console.log(getToken);
+  instance.interceptors.request.use(
+    (config) => {
+      const token = getToken?.();
+      if (token) {
+        config.headers = config.headers || {};
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+};
+
+attachAuthInterceptor(axiosInstance, () => accessToken);
+attachAuthInterceptor(fetchAxiosInstance, () => accessToken);
 
 export const setApiAccessToken = (token) => {
   accessToken = token;
@@ -27,27 +40,54 @@ export const setApiAccessToken = (token) => {
 export default axiosInstance;
 
 // ✅ 🔹 OpenAI API 요청 (GPT 호출)
-export const fetchOpenAIResponse = async (query) => {
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    if (!apiKey) {
-        console.error("🚨 OpenAI API 키가 설정되지 않았습니다!");
-        return { error: "API 키가 누락되었습니다." };
+export const fetchOpenAIStream = async (query, onChunk) => {
+  if (!query) {
+    console.error("❌ 'query'가 없습니다.");
+    throw new Error("query가 제공되지 않았습니다.");
+  }
+
+  try {
+    const response = await fetchAxiosInstance.post(
+      "/external/ai",
+      { message: query },
+      {
+        headers: {
+          Accept: "text/event-stream",
+          "Content-Type": "application/json",
+          ...(accessToken && {
+            Authorization: `Bearer ${accessToken}`,
+          }),
+        },
+      }
+    );
+
+    // fetch adapter 사용 시 fetchResponse가 반환되므로 getReader 사용 가능
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+    let partial = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      partial += decoder.decode(value, { stream: true });
+
+      const lines = partial.split("\n");
+      partial = lines.pop(); // 남아있을 incomplete 라인 보존
+
+      for (const line of lines) {
+        if (line.startsWith("data:")) {
+          const text = line.replace(/^data:\s?/, "").trim();
+          if (text) {
+            onChunk(text); // 전달된 callback 호출
+          }
+        }
+      }
     }
-
-    const client = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
-
-    try {
-        const completion = await client.chat.completions.create({
-            model: "gpt-4o",
-            max_tokens: 1024,
-            messages: [{ role: "user", content: query }],
-        });
-
-        return { answer: completion.choices[0].message.content };
-    } catch (err) {
-        console.error("🚨 OpenAI 요청 오류: ", err);
-        return { error: err.message };
-    }
+  } catch (error) {
+    console.error("💥 SSE 스트리밍 오류:", error);
+    throw error;
+  }
 };
 
 export const saveDashboard = async (userId, updatedLayout) => {

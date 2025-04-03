@@ -46,7 +46,7 @@ const DashboardView = () => {
   }, []);
 
   return (
-    <div className="h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* 대시보드 컨텐츠 */}
       <main className="flex-1 p-1">
         {layout.length === 0 ? (

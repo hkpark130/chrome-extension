@@ -6,6 +6,7 @@ import Bookmark from "@/components/Bookmark";
 import MeetingRoomCalendar from "@/components/MeetingRoomCalendar";
 import TopSite from "@/components/TopSite";
 import ChatGPT from "@/components/ChatGPTSearch";
+import Memo from "@/components/Memo";
 import LunchMenu from "@/components/LunchMenu";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ const widgets = [
   { component: "TopSite", content: (props) => <TopSite {...props} /> },
   { component: "ChatGPT", content: (props) => <ChatGPT {...props} /> },
   { component: "LunchMenu", content: (props) => <LunchMenu {...props} /> },
+  { component: "Memo", content: (props) => <Memo {...props} /> },
 ];
 
 const DashboardView = () => {

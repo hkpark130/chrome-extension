@@ -2,46 +2,29 @@ import React, { useState, useEffect } from 'react';
 import './item.css';
 import { Dice5 } from "lucide-react";
 import diceGif from "@/assets/dice.gif";
-
-const lunchOptions = [
-  { name: "김치찌개", weight: 3 },
-  { name: "된장찌개", weight: 2 },
-  { name: "삼겹살", weight: 5 },
-  { name: "비빔밥", weight: 2 },
-  { name: "돈까스", weight: 4 },
-  { name: "바지락 칼국수", weight: 3 },
-  { name: "짬뽕", weight: 3 },
-  { name: "제육", weight: 3 },
-  { name: "냉면", weight: 3 },
-  { name: "햄버거", weight: 3 },
-  { name: "포케", weight: 3 },
-  { name: "분식", weight: 3 },
-  { name: "엽떡", weight: 3 },
-  { name: "국밥", weight: 3 },
-  { name: "우동", weight: 3 },
-  { name: "라멘", weight: 3 },
-];
+import { getRandomMenu } from "@/api/api.js";
 
 const LunchMenu = ({ isEditing, isBordered }) => {
   const [selectedMenu, setSelectedMenu] = useState(null);
   const [isRolling, setIsRolling] = useState(false);
 
-  const handleDiceClick = () => {
+  const handleDiceClick = async () => {
     setIsRolling(true);
     setSelectedMenu(null);
-
-    setTimeout(() => {
-      setSelectedMenu(getRandomMenu());
-      setIsRolling(false);
-    }, 1800); // 2초 후 메뉴 표시
-  };
-
-  const getRandomMenu = () => {
-    const weightedList = lunchOptions.flatMap(item => Array(item.weight).fill(item.name));
-    const randomIndex = Math.floor(Math.random() * weightedList.length);
-    return weightedList[randomIndex];
-  };
   
+    try {
+      const result = await getRandomMenu();
+      setTimeout(() => {
+        setSelectedMenu(result); // 서버에서 받은 메뉴
+        setIsRolling(false);
+      }, 1800); // 주사위 도는 시간
+    } catch (error) {
+      console.error("점심 메뉴 가져오기 실패:", error);
+      setSelectedMenu("불러오기 실패...");
+      setIsRolling(false);
+    }
+  };
+
   return (
     <div
       className="item-style"

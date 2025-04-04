@@ -29,6 +29,11 @@ const ChatGPTSearch = ({ isEditing, isBordered }) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedResponse));
   };
 
+  const normalizeMarkdown = (text) => {
+    // 강제로 줄바꿈 추가
+    return text.replace(/```(\w+)?/g, '\n```$1\n').replace(/```/g, '\n```\n');
+  };
+
   const handleSearch = async () => {
     if (!searchTerm.trim()) return;
     setLoading(true);
@@ -44,10 +49,9 @@ const ChatGPTSearch = ({ isEditing, isBordered }) => {
           const updated = prev + chunk;
           return updated;
         });
+      }, async (finalResult) => {
+        saveStorage(finalResult);
       });
-
-      // 저장은 완료 후 전체 문장 기준
-      saveStorage(response);
 
     } catch (err) {
       setError(err.message || "응답 실패");
@@ -87,7 +91,7 @@ const ChatGPTSearch = ({ isEditing, isBordered }) => {
               onKeyDown={handleKeyDown}
               className="gpt-textarea w-full pl-10 pr-4 py-2 bg-gray-100 border resize-none
                 border-gray-300 focus:ring-2 focus:ring-gray-300 
-                rounded-xl text-gray-700 outline-none transition-all
+                text-gray-700 outline-none transition-all
                 shadow-sm focus:bg-white"
             />
           </div>
@@ -98,24 +102,24 @@ const ChatGPTSearch = ({ isEditing, isBordered }) => {
 
         {response && (
           <div className="mt-4 p-4 bg-white rounded-md shadow text-left">
-            <p className="font-bold text-gray-800">🤖 ChatGPT의 답변:</p>
+            <p className="font-bold text-gray-800">🤖 ChatGPT의 답변: </p>
             <ReactMarkdown
               rehypePlugins={[rehypeHighlight]}
               components={{
                 p: ({ children }) => (
                   <p className="mb-2 text-gray-800 whitespace-pre-wrap">{children}</p>
-                ),
+                ), // 일반 텍스트 스타일
                 pre: ({ children }) => (
-                  <pre className="p-4 bg-gray-100 text-black rounded-md overflow-x-auto">
+                  <pre className="p-4 bg-gray-100 text-black overflow-x-auto">
                     {children}
                   </pre>
-                ),
+                ), // 코드 블록 스타일 (밝은 배경 적용)
                 code: ({ children }) => (
                   <code className="p-1 bg-gray-200 text-red-500 rounded">{children}</code>
-                )
+                ) // 인라인 코드 스타일
               }}
             >
-              {response}
+              {normalizeMarkdown(response)}
             </ReactMarkdown>
           </div>
         )}

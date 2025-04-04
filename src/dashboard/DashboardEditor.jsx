@@ -7,6 +7,7 @@ import Bookmark from "@/components/Bookmark";
 import TopSite from "@/components/TopSite";
 import ChatGPT from "@/components/ChatGPTSearch";
 import LunchMenu from "@/components/LunchMenu";
+import Memo from "@/components/Memo";
 import MeetingRoomCalendar from "@/components/MeetingRoomCalendar";
 import { XCircle, Save, PencilRuler, CheckSquare, Square } from 'lucide-react';
 import { v4 as uuidv4 } from "uuid";
@@ -22,6 +23,7 @@ const widgets = [
   { component: "ChatGPT", label: "🤖 ChatGPT", w: 6, h: 3, isBordered: true, content: (props) => <ChatGPT isEditing={true} isBordered={props.isBordered} /> },
   { component: "MeetingRoomCalendar", label: "🗓️ 회의실 예약", w: 7, h: 9, isBordered: true, content: (props) => <MeetingRoomCalendar isEditing={true} isBordered={props.isBordered} /> },
   { component: "LunchMenu", label: "🍱 점심추천", w: 2, h: 3, isBordered: true, content: (props) => <LunchMenu isEditing={true} isBordered={props.isBordered} /> },
+  { component: "Memo", label: "📝 메모장", w: 2, h: 3, isBordered: true, content: (props) => <Memo isEditing={true} isBordered={props.isBordered} /> },
 ];
 
 const DashboardEditor = () => {

@@ -26,7 +26,9 @@ export const setApiAccessToken = (token) => {
 export default axiosInstance;
 
 // ✅ 🔹 OpenAI API 요청 (GPT 호출)
-export const fetchOpenAIStream = async (query, onChunk) => {
+export const fetchOpenAIStream = async (query, onChunk, onFinish) => {
+  let fullResponse = '';
+
   if (!query) {
     console.error("❌ 'query'가 없습니다.");
     throw new Error("query가 제공되지 않았습니다.");
@@ -44,27 +46,44 @@ export const fetchOpenAIStream = async (query, onChunk) => {
             Authorization: `Bearer ${accessToken}`,
           }),
         },
-        responseType: "stream", // axios fetch adapter를 위한 명시
-        adapter: "fetch", // fetch adapter 명시
+        responseType: "stream",
+        adapter: "fetch",
       }
     );
 
     const stream = response.data;
-    // fetch 기반 response.data 는 ReadableStream임 → pipeThrough으로 디코딩
     const reader = stream.pipeThrough(new TextDecoderStream()).getReader();
 
     while (true) {
       const { value, done } = await reader.read();
-      if (done) break;
+      if (done) {
+        if (onFinish) onFinish(fullResponse);
+        break;
+      }
 
-      const lines = value.split("\n");
+      const lines = value.split('\n');
+      for (let line of lines) {
+        // ✅ "data: " 제거
+        line = line.replace(/^data:/, '');
 
-      for (const line of lines) {
-        if (line.startsWith("data:")) {
-          const text = line.replace(/^data:\s?/, "").trim();
+        // ✅ [DONE] 체크
+        if (line.trim() === "[DONE]") {
+          if (onFinish) onFinish(fullResponse);
+          return;
+        }
+
+        // ✅ JSON 파싱하기
+        try {
+          const parsed = JSON.parse(line);
+          const text = parsed.content;
+
           if (text) {
-            onChunk(text);
+            fullResponse += text;
+            onChunk?.(text);
           }
+        } catch (err) {
+          console.warn("❗ JSON 파싱 실패:", line);
+          console.error(err);
         }
       }
     }
@@ -150,11 +169,29 @@ export const deleteMeeting = async (url) => {
 
 export const saveMeeting = async (meetingRequest) => {
   try {
-    console.log("meetingRequest: ", meetingRequest);
     const response = await axiosInstance.post(`/workspace/meeting`, meetingRequest);
     return response.data; // 저장된 예약 리스트 반환 (반복 포함 가능)
   } catch (error) {
     console.error("❌ 회의 예약 저장 실패:", error);
     throw error; // 상위에서 try-catch 할 수 있도록 re-throw
+  }
+};
+
+export const fetchMemo = async () => {
+  const res = await axiosInstance.get('/workspace/memo');
+  return res.data.content;
+};
+
+export const saveMemo = async (content) => {
+  await axiosInstance.post('/workspace/memo', { content });
+};
+
+export const getRandomMenu = async () => {
+  try {
+    const res = await axiosInstance.get('/workspace/lunch/');
+    return res.data.data.name;
+  } catch (error) {
+    console.error("점심 추천 실패:", error);
+    return '점심을 못 찾았어요...';
   }
 };

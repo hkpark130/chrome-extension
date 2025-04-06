@@ -1,19 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Pencil, Save } from 'lucide-react';
 import './item.css';
+import { getMemo, saveMemo } from "@/api/api.js";
+import { useAuth } from "react-oidc-context";
 
 const Memo = ({ isEditing, isBordered }) => {
+  const auth = useAuth();
+  const userId = auth.user?.profile?.sub;
   const [isWriting, setIsWriting] = useState(false);
   const [memoText, setMemoText] = useState("");
   const [editedText, setEditedText] = useState(memoText);
+
+  useEffect(() => {
+    if (auth.isAuthenticated) {
+      fetchMemo();
+    }
+  }, [auth.isAuthenticated]);
+
+  const fetchMemo = async () => {
+    try {
+      const response = await getMemo(userId);
+      setMemoText(response.data.data.content || "");
+      setEditedText(response.data.data.content || "");
+    } catch (error) {
+      console.error("메모 불러오기 실패:", error);
+    }
+  };
 
   const handleEditClick = () => {
     setIsWriting(true);
   };
 
-  const handleSaveClick = () => {
-    setMemoText(editedText);
-    setIsWriting(false);
+  const handleSaveClick = async () => {
+    console.log("저장 클릭됨", editedText);
+    try {
+      await saveMemo({
+        userId: userId,
+        content: editedText,
+      });
+      setMemoText(editedText);
+      setIsWriting(false);
+    } catch (error) {
+      console.error("메모 저장 실패:", error);
+    }
   };
 
   return (
@@ -26,7 +55,7 @@ const Memo = ({ isEditing, isBordered }) => {
         <div>
             {isWriting ? (
             <textarea
-                className="w-full border p-2 text-sm text-gray-700 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full border p-2 text-sm text-gray-700 resize-y focus:outline-none focus:ring-2 focus:ring-blue-400"
                 rows="5"
                 value={editedText}
                 onChange={(e) => setEditedText(e.target.value)}

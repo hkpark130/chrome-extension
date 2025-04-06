@@ -177,13 +177,16 @@ export const saveMeeting = async (meetingRequest) => {
   }
 };
 
-export const fetchMemo = async () => {
-  const res = await axiosInstance.get('/workspace/memo');
-  return res.data.content;
+export const getMemo = async (userId) => {
+  const res = await axiosInstance.get(`/workspace/memo/${userId}`);
+  return res;
 };
 
-export const saveMemo = async (content) => {
-  await axiosInstance.post('/workspace/memo', { content });
+export const saveMemo = async (memo) => {
+  await axiosInstance.post('/workspace/memo', {
+    userId: memo.userId,
+    content: memo.content,
+  });
 };
 
 export const getRandomMenu = async () => {
@@ -194,4 +197,9 @@ export const getRandomMenu = async () => {
     console.error("점심 추천 실패:", error);
     return '점심을 못 찾았어요...';
   }
+};
+
+export const fetchWeather = async () => {
+  const response = await axiosInstance.get("/external/weather");
+  return response.data;
 };

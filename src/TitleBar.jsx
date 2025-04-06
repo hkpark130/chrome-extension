@@ -3,6 +3,7 @@ import direaLogo from "@/assets/logo-direa.png";
 import userIcon from "@/assets/user-icon.png";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Weather } from "@/components/Weather";
 import { LogOut, LogIn, Settings } from "lucide-react";
 import { useAuth, hasAuthParams } from "react-oidc-context";
 import { setApiAccessToken } from "@/api/api.js";
@@ -72,6 +73,8 @@ const TitleBar = () => {
           {/* <Button onClick={handleTest}>{"테스트"}</Button> */}
         </div>
       </div>
+
+      <Weather />
 
       {/* 로고 */}
       <div className="flex flex-col items-center">

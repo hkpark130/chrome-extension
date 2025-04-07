@@ -32,7 +32,6 @@ const Memo = ({ isEditing, isBordered }) => {
   };
 
   const handleSaveClick = async () => {
-    console.log("저장 클릭됨", editedText);
     try {
       await saveMemo({
         userId: userId,

@@ -48,7 +48,8 @@
     "shadcn": "^2.4.0-canary.12",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "vite-plugin-svgr": "^4.3.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

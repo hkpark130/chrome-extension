@@ -199,7 +199,7 @@ export const getRandomMenu = async () => {
   }
 };
 
-export const fetchWeather = async () => {
-  const response = await axiosInstance.get("/external/weather");
+export const fetchWeather = async (lat, lon) => {
+  const response = await axiosInstance.get(`/external/weather/${lat}/${lon}`);
   return response.data;
 };

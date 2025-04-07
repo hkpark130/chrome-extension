@@ -3,7 +3,7 @@ import direaLogo from "@/assets/logo-direa.png";
 import userIcon from "@/assets/user-icon.png";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Weather } from "@/components/Weather";
+import Weather from "@/components/Weather";
 import { LogOut, LogIn, Settings } from "lucide-react";
 import { useAuth, hasAuthParams } from "react-oidc-context";
 import { setApiAccessToken } from "@/api/api.js";
@@ -74,10 +74,13 @@ const TitleBar = () => {
         </div>
       </div>
 
-      <Weather />
+      {/* ⬅️ Weather: 왼쪽 정렬 */}
+      <div className="flex-col flex-[0_0_40%]">
+        <Weather />
+      </div>
 
-      {/* 로고 */}
-      <div className="flex flex-col items-center">
+      {/* 🎯 로고: 중앙 정렬 */}
+      <div className="flex-col flex-[0_0_40%]">
         <img
           src={direaLogo}
           className="logo w-36 cursor-pointer transition hover:opacity-90"

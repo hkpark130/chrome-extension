@@ -8,22 +8,48 @@ import TopSite from "@/components/TopSite";
 import ChatGPT from "@/components/ChatGPTSearch";
 import LunchMenu from "@/components/LunchMenu";
 import Memo from "@/components/Memo";
+import Todolist from "@/components/Todolist";
+import Redmine from "@/components/Redmine";
+import Gitlab from "@/components/Gitlab";
 import MeetingRoomCalendar from "@/components/MeetingRoomCalendar";
 import { XCircle, Save, PencilRuler, CheckSquare, Square } from 'lucide-react';
 import { v4 as uuidv4 } from "uuid";
 import { saveDashboard, loadDashboard } from "@/api/api.js";
 import { useAuth } from "react-oidc-context";
+import redmineLogo from "@/assets/redmine.png";
+import gitlabLogo from "@/assets/gitlab.svg";
+import topsiteLogo from "@/assets/topsite.png";
 
 const ReactGridLayout = WidthProvider(RGL);
 const STORAGE_KEY = "dashboard_layout";
 
 const widgets = [
-  { component: "TopSite", label: "🔖 자주 방문하는 사이트", w: 7, h: 4, isBordered: true, content: (props) => <TopSite isEditing={true} isBordered={props.isBordered} /> },
+  { component: "TopSite", label: (
+      <span className="flex items-center gap-2">
+        <img src={topsiteLogo} alt="Topsite" className="w-5 h-5" />
+        <span>자주 방문하는 사이트</span>
+      </span>
+    ), w: 7, h: 4, isBordered: true, content: (props) => <TopSite isEditing={true} isBordered={props.isBordered} /> },
   { component: "Bookmark", label: "🔖 북마크", w: 7, h: 4, isBordered: true, content: (props) => <Bookmark isEditing={true} isBordered={props.isBordered} /> },
   { component: "ChatGPT", label: "🤖 ChatGPT", w: 6, h: 3, isBordered: true, content: (props) => <ChatGPT isEditing={true} isBordered={props.isBordered} /> },
   { component: "MeetingRoomCalendar", label: "🗓️ 회의실 예약", w: 7, h: 9, isBordered: true, content: (props) => <MeetingRoomCalendar isEditing={true} isBordered={props.isBordered} /> },
   { component: "LunchMenu", label: "🍱 점심추천", w: 2, h: 3, isBordered: true, content: (props) => <LunchMenu isEditing={true} isBordered={props.isBordered} /> },
   { component: "Memo", label: "📝 메모장", w: 2, h: 3, isBordered: true, content: (props) => <Memo isEditing={true} isBordered={props.isBordered} /> },
+  { component: "Todolist", label: "✅ Todo List", w: 2, h: 3, isBordered: true, content: (props) => <Todolist isEditing={true} isBordered={props.isBordered} /> },
+  { component: "Redmine", label: (
+      <span className="flex items-center gap-2">
+        <img src={redmineLogo} alt="Redmine" className="w-5 h-5" />
+        <span>Redmine</span>
+      </span>
+    ), w: 6, h: 3, isBordered: true, content: (props) => <Redmine isEditing={true} isBordered={props.isBordered} /> 
+  },
+  { component: "Gitlab", label: (
+      <span className="flex items-center gap-2">
+        <img src={gitlabLogo} alt="Gitlab" className="w-5 h-5" />
+        <span>Gitlab</span>
+      </span>
+    ), w: 6, h: 3, isBordered: true, content: (props) => <Gitlab isEditing={true} isBordered={props.isBordered} /> 
+  },
 ];
 
 const DashboardEditor = () => {

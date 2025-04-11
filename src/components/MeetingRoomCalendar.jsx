@@ -199,7 +199,7 @@ function MeetingRoomCalendar({ isEditing, isBordered }) {
   return (
     <div className="item-style">
       {isBordered && 
-        <div className="item-header">회의실 예약</div>
+        <div className="item-header">🗓️ 회의실 예약</div>
       }
       {/* 달력 영역 */}
       <div style={{ height: '500px', marginBottom: '30px', pointerEvents: isEditing ? "none" : "auto" }}>

@@ -76,7 +76,7 @@ const ChatGPTSearch = ({ isEditing, isBordered }) => {
   return (
     <div className="item-style">
       <div style={{ pointerEvents: isEditing ? "none" : "auto" }}>
-        {isBordered && <div className="item-header">ChatGPT 검색</div>}
+        {isBordered && <div className="item-header">🤖 ChatGPT 검색</div>}
         <div className="flex justify-center mb-1">
           <div className="relative w-[90%]">
             <Search

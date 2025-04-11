@@ -7,6 +7,9 @@ import MeetingRoomCalendar from "@/components/MeetingRoomCalendar";
 import TopSite from "@/components/TopSite";
 import ChatGPT from "@/components/ChatGPTSearch";
 import Memo from "@/components/Memo";
+import Todolist from "@/components/Todolist";
+import Redmine from "@/components/Redmine";
+import Gitlab from "@/components/Gitlab";
 import LunchMenu from "@/components/LunchMenu";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -23,6 +26,9 @@ const widgets = [
   { component: "ChatGPT", content: (props) => <ChatGPT {...props} /> },
   { component: "LunchMenu", content: (props) => <LunchMenu {...props} /> },
   { component: "Memo", content: (props) => <Memo {...props} /> },
+  { component: "Todolist", content: (props) => <Todolist {...props} /> },
+  { component: "Redmine", content: (props) => <Redmine {...props} /> },
+  { component: "Gitlab", content: (props) => <Gitlab {...props} /> },
 ];
 
 const DashboardView = () => {

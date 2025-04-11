@@ -168,7 +168,7 @@ const Bookmark = ({ isEditing, isBordered }) => {
         pointerEvents: isEditing ? "none" : "auto", // 편집 모드일 때 위젯 이동 금지(이거 스크롤도 안 됨)
       }}>
         {isBordered && 
-          <div className="item-header">즐겨찾기</div>
+          <div className="item-header">🔖 즐겨찾기</div>
         }
         {!auth.isAuthenticated ? (
           <p className="text-center text-gray-600 font-semibold">로그인 후 북마크를 이용할 수 있습니다</p>

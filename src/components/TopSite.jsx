@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './item.css';
+import topsiteLogo from "@/assets/topsite.png";
 
 const TopSite = ({ isEditing, isBordered }) => {
   const [topSites, setTopSites] = useState([]);
@@ -29,7 +30,12 @@ const TopSite = ({ isEditing, isBordered }) => {
         pointerEvents: isEditing ? "none" : "auto", // 편집 모드일 때 위젯 이동 금지(이거 스크롤도 안 됨)
       }}>
         {isBordered && 
-          <div className="item-header">자주 방문한 사이트</div>
+          <div className="item-header">
+            <span className="flex justify-center items-center gap-2">
+              <img src={topsiteLogo} alt="Topsite" className="w-5 h-5" />
+              <span>자주 방문한 사이트</span>
+            </span>
+          </div>
         }
         <div className="flex justify-center gap-4 flex-wrap">
           {topSites.map((site, index) => (

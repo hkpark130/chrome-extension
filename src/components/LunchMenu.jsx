@@ -34,7 +34,7 @@ const LunchMenu = ({ isEditing, isBordered }) => {
         pointerEvents: isEditing ? "none" : "auto", // 편집 모드일 때 위젯 이동 금지(이거 스크롤도 안 됨)
       }}>
         {isBordered && 
-          <div className="item-header">점심추천</div>
+          <div className="item-header">🍱 점심추천</div>
         }
 
         <div className="menu-container">

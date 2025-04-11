@@ -145,6 +145,47 @@ export const loadDashboard = async (userId) => {
   }
 };
 
+export const saveTodolist = async (userId, todos) => {
+  if (!userId) {
+    console.error("오류: userId 가 없습니다.");
+    throw new Error("userId 가 제공되지 않았습니다.");
+  }
+
+  try {
+    const payload = todos.map((item) => ({
+      id: item.id,
+      subject: item.subject,
+      checked: item.checked,
+      priority: item.priority,
+    }));
+
+    await axiosInstance.put(`/workspace/todo/${userId}`, payload);
+  } catch (error) {
+    console.error("Todo list 저장 실패: ", error);
+  }
+};
+
+export const loadTodolist = async (userId) => {
+  if (!userId) {
+    console.error("오류: userId 가 없습니다.");
+    throw new Error("userId 가 제공되지 않았습니다.");
+  }
+
+  try {
+    const response = await axiosInstance.get(`/workspace/todo/${userId}`);
+
+    return response.data.data.map((item) => ({
+      id: item.id,
+      subject: item.subject,
+      checked: item.checked,
+      priority: item.priority,
+    }));
+  } catch (error) {
+    console.error("Todo list 로드 실패: ", error);
+    return [];
+  }
+};
+
 export const loadMeeting = async () => {
   try {
     const response = await axiosInstance.get(`/workspace/meeting`);
@@ -189,6 +230,14 @@ export const saveMemo = async (memo) => {
   });
 };
 
+export const getTodos = async (userId) => {
+  await axiosInstance.get(`/todo?userId=${userId}`);
+}
+
+export const saveTodos = async ({ userId, items }) => {
+  await axiosInstance.post(`/todo`, { userId, items });
+}
+
 export const getRandomMenu = async () => {
   try {
     const res = await axiosInstance.get('/workspace/lunch/');
@@ -203,3 +252,17 @@ export const fetchWeather = async (lat, lon) => {
   const response = await axiosInstance.get(`/external/weather/${lat}/${lon}`);
   return response.data;
 };
+
+export async function fetchRedmineIssues(email, page, limit) {
+  const offset = (page - 1) * limit;
+  const response = await axiosInstance.get(`/external/issues?email=${encodeURIComponent(email)}&offset=${offset}&limit=${limit}`);
+  return response.data;
+}
+
+export async function fetchGitlabMRs(email, page, limit) {
+  const offset = (page - 1) * limit;
+  const url = `/external/gitlab?email=${encodeURIComponent(email)}&offset=${offset}&limit=${limit}`;
+  const response = await axiosInstance.get(url);
+
+  return response.data;
+}

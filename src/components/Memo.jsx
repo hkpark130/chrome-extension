@@ -50,8 +50,8 @@ const Memo = ({ isEditing, isBordered }) => {
             style={{
                 pointerEvents: isEditing ? "none" : "auto", // 편집 모드일 때 위젯 이동 금지(이거 스크롤도 안 됨)
             }}>
-        {isBordered && <div className="item-header">메모장</div>}
-        <div>
+        {isBordered && <div className="item-header">📝 메모장</div>}
+        <div className="pb-[60px]">
             {isWriting ? (
             <textarea
                 className="w-full border p-2 text-sm text-gray-700 resize-y focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -65,7 +65,7 @@ const Memo = ({ isEditing, isBordered }) => {
             </div>
             )}
         </div>
-        <div className="flex justify-end">
+        <div className="fixed bottom-4 right-4 z-50">
           {isWriting ? (
             <button onClick={handleSaveClick} className="icon-button save-button flex 
             border-[2px] border-black-500 text-black-600 py-2 px-4 rounded-full shadow-md 

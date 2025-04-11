@@ -19,6 +19,8 @@
     text-align: left; /* 텍스트 가운데 정렬 */
     width: 80%; /* Modal 내용의 최대 너비 조정 */
     max-width: 400px; /* 최대 너비 설정 */
+    max-height: 80vh;       /* 창 높이의 80%까지만 확장 */
+    overflow-y: auto;
   }
   
   .modal-content h3 {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from "react-oidc-context";
+import { useUser } from "@/context/UserProvider";
 import Modal from "@/components/Modal";
 import { fetchRedmineIssues } from '@/api/api.js';
 import ReactMarkdown from 'react-markdown';
@@ -8,7 +8,7 @@ import rehypeRaw from 'rehype-raw';
 import redmineLogo from "@/assets/redmine.png";
 
 const Redmine = ({ isEditing, isBordered }) => {
-  const auth = useAuth();
+  const { user, setUser } = useUser();
   const [issues, setIssues] = useState([]);       // 현재 페이지 이슈
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,7 +20,7 @@ const Redmine = ({ isEditing, isBordered }) => {
   const [totalCount, setTotalCount] = useState(0);   // 전체 이슈 수
   const totalPages = Math.ceil(totalCount / perPage);
 
-  const email = auth.user?.profile?.email;
+  const email = user?.profile?.email;
   const redmineBaseUrl = "https://issue.direa.synology.me";
   
   useEffect(() => {

@@ -14,10 +14,9 @@ import LunchMenu from "@/components/LunchMenu";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { loadDashboard } from "@/api/api.js";
-import { useAuth } from "react-oidc-context";
+import { useUser } from "@/context/UserProvider";
 
 const ReactGridLayout = WidthProvider(RGL);
-const STORAGE_KEY = "dashboard_layout";
 
 const widgets = [
   { component: "Bookmark", content: (props) => <Bookmark {...props} /> },
@@ -34,24 +33,27 @@ const widgets = [
 const DashboardView = () => {
   const [layout, setLayout] = useState([]);
   const navigate = useNavigate();
-  const auth = useAuth();
+  const { isLoggedIn, user, setUser } = useUser();
 
   useEffect(() => {
     const fetchLayout = async () => {
-      if (auth.isAuthenticated) {
-        const layoutFromDB = await loadDashboard(auth.user?.profile?.sub);
+      if (user) {
+        const layoutFromDB = await loadDashboard(user?.profile?.sub);
         setLayout(layoutFromDB);
       }
     };
     fetchLayout();
-  }, [auth.isAuthenticated]);
+  }, [isLoggedIn]);
 
-  useEffect(() => {
-    const savedLayout = localStorage.getItem(STORAGE_KEY);
-    if (savedLayout) {
-      setLayout(JSON.parse(savedLayout).layout || []);
-    }
-  }, []);
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center space-y-4">
+          <p className="text-gray-700 text-lg font-semibold">🔒 로그인 후 이용하실 수 있습니다</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">

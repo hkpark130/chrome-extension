@@ -34,9 +34,6 @@
         }
     ],
     "host_permissions": [
-        "https://*/", "http://*/", "http://192.168.3.8/*", "https://keycloak.direa.synology.me/*"
-    ],
-    "externally_connectable": {
-        "matches": ["https://keycloak.direa.synology.me/*"]
-    }
+        "http://192.168.2.44:8000/*", "http://192.168.3.8/*", "https://keycloak.direa.synology.me/*"
+    ]
 }

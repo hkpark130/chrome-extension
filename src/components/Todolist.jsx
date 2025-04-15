@@ -8,29 +8,46 @@ import "./item.css"; // 공통 스타일
 import Modal from "./Modal";
 import { Button } from "@/components/ui/button";
 import { saveTodolist, loadTodolist } from "@/api/api.js";
-import { useAuth } from "react-oidc-context";
+import { useUser } from "@/context/UserProvider";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const TodoGridList = ({ isEditing, isBordered }) => {
-  const auth = useAuth();
-  const userId = auth.user?.profile?.sub;
-  const layoutMountedRef = useRef(false);
+  const { user, setUser } = useUser();
+  const userId = user?.profile?.sub;
   const [items, setItems] = useState([]);
   const [showEditForm, setShowEditForm] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTodolist, setNewTodolist] = useState({ id: "", subject: "" });
+  const [isInitialLoadDone, setIsInitialLoadDone] = useState(false);
+
+  function useDebounce(value, delay = 800) {
+    const [debounced, setDebounced] = useState(value);
+  
+    useEffect(() => {
+      const timeout = setTimeout(() => {
+        setDebounced(value);
+      }, delay);
+      return () => clearTimeout(timeout); // 타이머 초기화
+    }, [value, delay]);
+  
+    return debounced;
+  }
+  const debouncedItems = useDebounce(items, 10);
 
   useEffect(() => {
-    if (!auth.isAuthenticated) return;
+    if (!user) return;
     loadTodolist(userId).then((data) => {
       setItems(data);
+      setIsInitialLoadDone(true);
     });
-  }, [auth.isAuthenticated]);
+  }, [user]);
 
   useEffect(() => {
-    saveTodolist(userId, items);
-  }, [items]);
+    if (!isInitialLoadDone) return;
+    if (debouncedItems.length < 1) return;
+    saveTodolist(userId, debouncedItems);
+  }, [debouncedItems]);
   
   // priority 순으로 정렬
   const sortedItems = [...items].sort((a, b) => a.priority - b.priority);
@@ -58,7 +75,15 @@ const TodoGridList = ({ isEditing, isBordered }) => {
   };
 
   const handleDelete = (id) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
+    setItems((prev) => {
+      const updated = prev.filter((item) => item.id !== id);
+  
+      if (updated.length === 0) {
+        saveTodolist(userId, []);
+      }
+  
+      return updated;
+    });
   };
 
   const onLayoutChange = (newLayout) => {

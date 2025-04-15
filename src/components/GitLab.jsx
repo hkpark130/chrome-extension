@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useAuth } from 'react-oidc-context';
+import { useUser } from "@/context/UserProvider";
 import Modal from '@/components/Modal';
 import { fetchGitlabMRs } from '@/api/api.js';
 import ReactMarkdown from 'react-markdown';
@@ -8,8 +8,8 @@ import rehypeRaw from 'rehype-raw';
 import gitlabLogo from "@/assets/gitlab.svg";
 
 const GitLab = ({ isEditing, isBordered }) => {
-  const auth = useAuth();
-  const email = auth?.user?.profile?.email;
+  const { user, setUser } = useUser();
+  const email = user?.profile?.email;
 
   const [allMrs, setAllMrs] = useState([]);
   const [mrs, setMrs] = useState([]);

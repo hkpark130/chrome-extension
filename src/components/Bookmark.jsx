@@ -5,13 +5,13 @@ import axiosInstance from "@/api/api";
 import Modal from './Modal';
 import { Button } from "@/components/ui/button";
 import { MoreVertical, Plus, ChevronLeft, ChevronRight, Search } from "lucide-react";
-import { useAuth } from "react-oidc-context";
+import { useUser } from "@/context/UserProvider";
 
 const itemsPerPage = 6;
 
 const Bookmark = ({ isEditing, isBordered }) => {
-  const auth = useAuth();
-  const userId = auth.user?.profile?.sub;
+  const { user, setUser } = useUser();
+  const userId = user?.profile?.sub;
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [bookmarks, setBookmarks] = useState([]);
@@ -21,10 +21,10 @@ const Bookmark = ({ isEditing, isBordered }) => {
   const [newBookmark, setNewBookmark] = useState({ name: '', url: '' });
 
   useEffect(() => {
-    if (auth.isAuthenticated) {  // 🔹 로그인된 경우만 북마크 가져오기
+    if (user) {  // 🔹 로그인된 경우만 북마크 가져오기
       fetchBookmarks();
     }
-  }, [auth.isAuthenticated]);
+  }, [user]);
 
   const normalizeURL = (url) => {
     if (!/^https?:\/\//i.test(url)) { // URL이 http:// 또는 https:// 로 시작하지 않으면
@@ -170,7 +170,7 @@ const Bookmark = ({ isEditing, isBordered }) => {
         {isBordered && 
           <div className="item-header">🔖 즐겨찾기</div>
         }
-        {!auth.isAuthenticated ? (
+        {!user ? (
           <p className="text-center text-gray-600 font-semibold">로그인 후 북마크를 이용할 수 있습니다</p>
         ) : (
           <>
@@ -226,7 +226,7 @@ const Bookmark = ({ isEditing, isBordered }) => {
           </>
         )}
 
-        {auth.isAuthenticated && 
+        {user && 
           <div className="flex items-center justify-center mt-2 space-x-3">
             {currentPage > 0 && (
               <Button onClick={() => handlePageChange(-1)} 

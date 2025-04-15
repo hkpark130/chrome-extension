@@ -6,7 +6,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import Modal from './Modal';
 import { Button } from "@/components/ui/button";
 import { loadMeeting, deleteMeeting, saveMeeting } from "@/api/api.js";
-import { useAuth } from "react-oidc-context";
+import { useUser } from "@/context/UserProvider";
 
 // moment를 사용하여 localizer 설정
 moment.locale('ko');
@@ -28,7 +28,7 @@ const messages = {
 };
 
 function MeetingRoomCalendar({ isEditing, isBordered }) {
-  const auth = useAuth();
+  const { user, setUser } = useUser();
   const [view, setView] = useState("month");
   const [events, setEvents] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -41,7 +41,7 @@ function MeetingRoomCalendar({ isEditing, isBordered }) {
     repeatWeeks: 4,
     baseDate: null,
     createdBy: '',
-    createdByName: auth.user?.profile?.name,
+    createdByName: user?.profile?.name,
   });
   const [alertMessage, setAlertMessage] = useState('');
   const [showAlert, setShowAlert] = useState(false);
@@ -120,8 +120,8 @@ function MeetingRoomCalendar({ isEditing, isBordered }) {
       isRecurring: false,
       repeatWeeks: 4,
       baseDate: start,
-      createdBy: auth.user?.profile?.sub,
-      createdByName: auth.user?.profile?.name,
+      createdBy: user?.profile?.sub,
+      createdByName: user?.profile?.name,
     });
     setShowModal(true);
   };

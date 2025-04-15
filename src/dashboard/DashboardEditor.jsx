@@ -15,13 +15,13 @@ import MeetingRoomCalendar from "@/components/MeetingRoomCalendar";
 import { XCircle, Save, PencilRuler, CheckSquare, Square } from 'lucide-react';
 import { v4 as uuidv4 } from "uuid";
 import { saveDashboard, loadDashboard } from "@/api/api.js";
-import { useAuth } from "react-oidc-context";
+import { useUser } from "@/context/UserProvider";
 import redmineLogo from "@/assets/redmine.png";
 import gitlabLogo from "@/assets/gitlab.svg";
 import topsiteLogo from "@/assets/topsite.png";
+import { login } from "@/auth/auth";
 
 const ReactGridLayout = WidthProvider(RGL);
-const STORAGE_KEY = "dashboard_layout";
 
 const widgets = [
   { component: "TopSite", label: (
@@ -53,42 +53,28 @@ const widgets = [
 ];
 
 const DashboardEditor = () => {
-  const auth = useAuth();
+  const { user, setUser, isLoggedIn, auth } = useUser();
   const navigate = useNavigate();
   const [layout, setLayout] = useState([]);
   const [draggingWidget, setDraggingWidget] = useState(null);
-  const userId = auth.user?.profile?.sub;
+  const userId = user?.profile?.sub;
 
   useEffect(() => {
-    const savedLayout = localStorage.getItem(STORAGE_KEY);
-    if (savedLayout) {
-      const parsed = JSON.parse(savedLayout);
-      setLayout(parsed.layout || []);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!auth.isLoading && !auth.isAuthenticated) {
-      auth.signinRedirect(); // 로그인 페이지로 이동
+    if (!isLoggedIn) {
+      alert("🔒 로그인 후 이용하실 수 있습니다");
+      navigate("/");
+      login({ auth, setUser });
     }
 
     const fetchLayout = async () => {
-      if (!auth.isLoading && auth.isAuthenticated) {
+      if (user) {
         const layoutFromDB = await loadDashboard(userId);
         setLayout(layoutFromDB);
       }
     };
   
     fetchLayout();
-  }, [auth.isLoading, auth.isAuthenticated]);
-
-  if (auth.isLoading) {
-    return <div>🔒 로그인 상태 확인 중...</div>;
-  }
-
-  if (!auth.isAuthenticated) {
-    return null;
-  }
+  }, [user]);
 
   const handleSave = async (layout) => {
     try {
@@ -176,7 +162,7 @@ const DashboardEditor = () => {
             key={widget.component}
             draggable
             onDragStart={onDragStart(widget)}
-            className="p-3 bg-gray-200 border rounded-md cursor-grab mb-3 hover:bg-gray-300 transition"
+            className="text-[16px] p-3 bg-gray-200 border rounded-md cursor-grab mb-3 hover:bg-gray-300 transition"
           >
             {widget.label}
           </div>

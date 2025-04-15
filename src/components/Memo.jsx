@@ -2,20 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Pencil, Save } from 'lucide-react';
 import './item.css';
 import { getMemo, saveMemo } from "@/api/api.js";
-import { useAuth } from "react-oidc-context";
+import { useUser } from "@/context/UserProvider";
 
 const Memo = ({ isEditing, isBordered }) => {
-  const auth = useAuth();
-  const userId = auth.user?.profile?.sub;
+  const { user, setUser } = useUser();
+  const userId = user?.profile?.sub;
   const [isWriting, setIsWriting] = useState(false);
   const [memoText, setMemoText] = useState("");
   const [editedText, setEditedText] = useState(memoText);
 
   useEffect(() => {
-    if (auth.isAuthenticated) {
+    if (user) {
       fetchMemo();
     }
-  }, [auth.isAuthenticated]);
+  }, [user]);
 
   const fetchMemo = async () => {
     try {

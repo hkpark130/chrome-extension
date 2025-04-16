@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://192.168.2.44:8000";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://chrome-ext.direa.synology.me";
 
 let accessToken = null;
 
